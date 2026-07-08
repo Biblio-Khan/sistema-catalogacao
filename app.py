@@ -6,16 +6,19 @@ st.title("📚 Formulário de Catalogação: Centro de Desenvolvimento de Tecnol
 
 with st.form("form_cadastro"):
     st.subheader("Dados da Instituição")
-    # Campo para instituição com opção de "Outro"
+    
     inst_opcoes = ["Centro de Desenvolvimento de Tecnologia Nuclear (CDTN)", "Outro"]
     instituicao_selecionada = st.selectbox("Instituição/Unidade acadêmica", inst_opcoes)
     
-    instituicao = instituicao_selecionada
+    # Lógica condicional para o campo "Outro"
     if instituicao_selecionada == "Outro":
-        instituicao = st.text_input("Digite o nome da instituição")
+        instituicao = st.text_input("Digite o nome da sua unidade acadêmica:")
+    else:
+        instituicao = instituicao_selecionada
 
     st.subheader("Dados do Autor")
     
+    # ... (restante dos campos permanecem iguais)
     st.info("""
     **Instruções para o campo Autor:**
     Digite o nome começando pelo último sobrenome, seguido por vírgula e o restante dos prenomes.
@@ -24,38 +27,17 @@ with st.form("form_cadastro"):
     * **Origem Hispânica:** (Ex: Gabriel García Márquez) -> `García Marquez, Gabriel`
     """)
     
-    autor = st.text_input(
-        "Nome completo do autor (formato de citação)", 
-        placeholder="Sobrenome(s), Nome"
-    )
+    autor = st.text_input("Nome completo do autor (formato de citação)", placeholder="Sobrenome(s), Nome")
 
     st.subheader("Dados do Trabalho")
-    titulo = st.text_input(
-        "Título do trabalho", 
-        placeholder="Apenas a primeira letra da primeira palavra e nomes próprios em maiúsculas"
-    )
+    titulo = st.text_input("Título do trabalho", placeholder="Apenas a primeira letra da primeira palavra e nomes próprios em maiúsculas")
     st.caption("Ex: Da invisibilidade social à visibilidade discursiva: Estudo enunciativo a respeito das ações da família na comunidade rural - Maués/AM")
     
-    subtitulo = st.text_input(
-        "Subtítulo (se houver)", 
-        placeholder="Insira o subtítulo, se existir"
-    )
+    subtitulo = st.text_input("Subtítulo (se houver)", placeholder="Insira o subtítulo, se existir")
     
-    tipo_trabalho = st.selectbox(
-        "Tipo de trabalho e titulação",
-        (
-            "Trabalho de conclusão de curso (Graduação)",
-            "Trabalho de conclusão de curso (Especialização)",
-            "Dissertação (Mestrado)",
-            "Tese (Doutorado)"
-        )
-    )
+    tipo_trabalho = st.selectbox("Tipo de trabalho e titulação", ("Trabalho de conclusão de curso (Graduação)", "Trabalho de conclusão de curso (Especialização)", "Dissertação (Mestrado)", "Tese (Doutorado)"))
     
-    ano_defesa = st.text_input(
-        "Ano da defesa", 
-        help="Digite o ano que está informado na folha de rosto",
-        placeholder="Ex: 2026"
-    )
+    ano_defesa = st.text_input("Ano da defesa", help="Digite o ano que está informado na folha de rosto", placeholder="Ex: 2026")
     
     num_folhas = st.number_input("Número total de folhas", min_value=1, step=1)
     st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
@@ -66,7 +48,8 @@ with st.form("form_cadastro"):
     submit_button = st.form_submit_button("Enviar dados")
 
 if submit_button:
-    if autor and titulo and ano_defesa and num_folhas:
+    # Ajuste na validação para considerar a instituição digitada no "Outro"
+    if autor and titulo and ano_defesa and num_folhas and (instituicao_selecionada != "Outro" or instituicao):
         if "," not in autor:
             st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
         else:
@@ -82,7 +65,6 @@ if submit_button:
             resumo_folhas = f"{num_folhas} f."
             if ilustracoes == "Sim":
                 resumo_folhas += " il."
-            
             st.write(f"**Número de folhas:** {resumo_folhas}")
     else:
-        st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
+        st.error("Por favor, preencha todos os campos obrigatórios.")
