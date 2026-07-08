@@ -4,6 +4,41 @@ st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 st.title("Formulário de Elaboração de Ficha Catlográfica: Bib CDTN")
 
+def check_password():
+    """Retorna True se o usuário inserir a senha correta."""
+    def password_entered():
+        if st.session_state["password"] == "SenhaDoCDTN123": # Altere a senha aqui
+            st.session_state["password_correct"] = True
+        else:
+            st.session_state["password_correct"] = False
+            st.error("Senha incorreta")
+
+    if "password_correct" not in st.session_state:
+        # Primeira vez que abre
+        st.sidebar.text_input("Senha da Bibliotecária", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        # Senha incorreta
+        st.sidebar.text_input("Senha da Bibliotecária", type="password", on_change=password_entered, key="password")
+        return False
+    else:
+        # Senha correta
+        return True
+
+# --- Lógica do Layout ---
+st.title("Sistema de Catalogação - CDTN")
+
+# Verifica se a senha foi digitada
+if check_password():
+    # MODO BIBLIOTECÁRIA
+    st.sidebar.success("Acesso Liberado: Bibliotecária")
+    if st.sidebar.button("Sair do Painel"):
+        st.session_state["password_correct"] = False
+        st.rerun()
+    
+    # Chama aqui a sua função interface_bibliotecaria() que criamos antes
+    interface_bibliotecaria()
+
 # --- Dados da Banca (FORA do form para garantir reatividade) ---
 st.subheader("Dados da Banca Examinadora")
 st.info("""
