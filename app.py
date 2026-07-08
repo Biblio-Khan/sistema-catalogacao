@@ -32,6 +32,17 @@ with st.form("form_cadastro"):
         placeholder="Insira o subtítulo, se existir"
     )
     
+    # Campo novo para tipo de trabalho
+    tipo_trabalho = st.selectbox(
+        "Tipo de trabalho e titulação",
+        (
+            "Trabalho de conclusão de curso (Graduação)",
+            "Trabalho de conclusão de curso (Especialização)",
+            "Dissertação (Mestrado)",
+            "Tese (Doutorado)"
+        )
+    )
+    
     ano_defesa = st.text_input(
         "Ano da defesa", 
         help="Digite o ano que está informado na folha de rosto",
@@ -42,7 +53,6 @@ with st.form("form_cadastro"):
     st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
     st.info("💡 **Dica:** Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
     
-    # Campo novo para ilustrações
     ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
     
     submit_button = st.form_submit_button("Enviar dados")
@@ -53,13 +63,13 @@ if submit_button:
             st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
         else:
             st.success("Dados registrados com sucesso!")
+            st.write(f"**Tipo de trabalho:** {tipo_trabalho}")
             st.write(f"**Autor:** {autor}")
             st.write(f"**Título:** {titulo}")
             if subtitulo:
                 st.write(f"**Subtítulo:** {subtitulo}")
             st.write(f"**Ano da defesa:** {ano_defesa}")
             
-            # Lógica para exibir 'il.' se houver ilustrações
             resumo_folhas = f"{num_folhas} f."
             if ilustracoes == "Sim":
                 resumo_folhas += " il."
