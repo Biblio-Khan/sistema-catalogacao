@@ -2,9 +2,18 @@ import streamlit as st
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
-st.title("📚 Cadastro de Obra")
+st.title("📚 Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
 
 with st.form("form_cadastro"):
+    st.subheader("Dados da Instituição")
+    # Campo para instituição com opção de "Outro"
+    inst_opcoes = ["Centro de Desenvolvimento de Tecnologia Nuclear (CDTN)", "Outro"]
+    instituicao_selecionada = st.selectbox("Instituição/Unidade acadêmica", inst_opcoes)
+    
+    instituicao = instituicao_selecionada
+    if instituicao_selecionada == "Outro":
+        instituicao = st.text_input("Digite o nome da instituição")
+
     st.subheader("Dados do Autor")
     
     st.info("""
@@ -32,7 +41,6 @@ with st.form("form_cadastro"):
         placeholder="Insira o subtítulo, se existir"
     )
     
-    # Campo novo para tipo de trabalho
     tipo_trabalho = st.selectbox(
         "Tipo de trabalho e titulação",
         (
@@ -63,6 +71,7 @@ if submit_button:
             st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
         else:
             st.success("Dados registrados com sucesso!")
+            st.write(f"**Instituição:** {instituicao}")
             st.write(f"**Tipo de trabalho:** {tipo_trabalho}")
             st.write(f"**Autor:** {autor}")
             st.write(f"**Título:** {titulo}")
