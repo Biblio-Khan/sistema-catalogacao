@@ -28,37 +28,29 @@ with st.form("form_cadastro"):
     area_concentracao = st.radio("Área de concentração", ("Ciência e Tecnologia das Radiações e Reatores Nucleares", "Ciência e Tecnologia dos Minerais e Meio Ambiente", "Ciência e Tecnologia dos Materiais"))
     ano_defesa = st.text_input("Ano da defesa", help="Digite o ano que está informado na folha de rosto", placeholder="Ex: 2026")
     
-    # Banca Examinadora
     st.subheader("Dados da Banca Examinadora")
     titulos_opcoes = ["Dr.", "Dra.", "Me.", "Ma."]
-    
-    # --- Seção Orientadores (Independente) ---
-    st.write("###  Orientador(es)")
+
+    st.write("### 🎓 Orientador(es)")
     num_orientadores = st.selectbox("Quantos orientadores?", options=[1, 2, 3], key="qtd_o")
     lista_orientadores = []
-    
     for i in range(num_orientadores):
         col1, col2 = st.columns([3, 1])
-        # Chaves exclusivas com prefixo 'o_'
         nome_o = col1.text_input(f"Nome do orientador {i+1}", key=f"nome_o_{i}")
         tit_o = col2.selectbox("Título", titulos_opcoes, key=f"tit_o_{i}")
         if nome_o:
             lista_orientadores.append(f"{tit_o} {nome_o}")
 
-    # --- Seção Coorientadores (Independente) ---
-    st.write("### Coorientador(es)")
+    st.write("### 🤝 Coorientador(es)")
     num_coorientadores = st.selectbox("Quantos coorientadores?", options=[0, 1, 2, 3], key="qtd_c")
     lista_coorientadores = []
-    
-    # Esta lógica agora é totalmente isolada da anterior
     if num_coorientadores > 0:
-        for i in range(num_coorientadores):
-            col1, col2 = st.columns([3, 1])
-            # Chaves exclusivas com prefixo 'c_' para não conflitar
-            nome_c = col1.text_input(f"Nome do coorientador {i+1}", key=f"nome_c_{i}")
-            tit_c = col2.selectbox("Título", titulos_opcoes, key=f"tit_c_{i}")
-            if nome_c:
-                lista_coorientadores.append(f"{tit_c} {nome_c}")
+    for i in range(num_coorientadores):
+        col1, col2 = st.columns([3, 1])
+        nome_c = col1.text_input(f"Nome do coorientador {i+1}", key=f"nome_c_{i}")
+        tit_c = col2.selectbox("Título", titulos_opcoes, key=f"tit_c_{i}")
+        if nome_c:
+            lista_coorientadores.append(f"{tit_c} {nome_c}")
     
     # ... (Restante do formulário)
     submit_button = st.form_submit_button("Enviar dados")
