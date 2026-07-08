@@ -17,33 +17,7 @@ def formulario_aluno():
     st.subheader("Dados da Instituição")
     instituicao = "Centro de Desenvolvimento de Tecnologia Nuclear (CDTN)"
     st.write(f"Instituição: {instituicao}")
-    # ... resto do seu formulário ...
-
-# --- FUNÇÃO: LOGIN ---
-def check_password():
-    def password_entered():
-        if st.session_state["password"] == "BIB@CDTN":
-            st.session_state["password_correct"] = True
-        else:
-            st.session_state["password_correct"] = False
-            st.error("Senha incorreta")
-
-    if "password_correct" not in st.session_state:
-        st.sidebar.text_input("Senha da Bibliotecária", type="password", on_change=password_entered, key="password")
-        return False
-    return st.session_state["password_correct"]
-
-# --- FLUXO PRINCIPAL ---
-if check_password():
-    st.sidebar.success("Acesso Liberado: Bibliotecária")
-    if st.sidebar.button("Sair do Painel"):
-        st.session_state["password_correct"] = False
-        st.rerun()
-    interface_bibliotecaria()
-else:
-    formulario_aluno()
-
-# --- Dados da Banca (FORA do form para garantir reatividade) ---
+    # --- Dados da Banca (FORA do form para garantir reatividade) ---
 st.subheader("Dados da Banca Examinadora")
 st.info("""
 **Instruções para Banca:**
@@ -119,6 +93,30 @@ with st.form("form_dados_gerais"):
     ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
     
     submit_button = st.form_submit_button("Enviar dados")
+
+# --- FUNÇÃO: LOGIN ---
+def check_password():
+    def password_entered():
+        if st.session_state["password"] == "BIB@CDTN":
+            st.session_state["password_correct"] = True
+        else:
+            st.session_state["password_correct"] = False
+            st.error("Senha incorreta")
+
+    if "password_correct" not in st.session_state:
+        st.sidebar.text_input("Senha da Bibliotecária", type="password", on_change=password_entered, key="password")
+        return False
+    return st.session_state["password_correct"]
+
+# --- FLUXO PRINCIPAL ---
+if check_password():
+    st.sidebar.success("Acesso Liberado: Bibliotecária")
+    if st.sidebar.button("Sair do Painel"):
+        st.session_state["password_correct"] = False
+        st.rerun()
+    interface_bibliotecaria()
+else:
+    formulario_aluno()
 
 # --- Processamento Final ---
 if submit_button:
