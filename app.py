@@ -37,6 +37,11 @@ if check_password():
         st.rerun()
     # Chama aqui a sua função interface_bibliotecaria() que criamos antes
     interface_bibliotecaria()
+else:
+    # MODO ALUNO (Padrão)
+    st.info("Bem-vindo! Preencha o formulário abaixo para iniciar a catalogação.")
+    # Coloque aqui o formulário do aluno que você já construiu
+    st.write("--- Formulário do Aluno Aqui ---")
 
 # --- Dados da Banca (FORA do form para garantir reatividade) ---
 st.subheader("Dados da Banca Examinadora")
