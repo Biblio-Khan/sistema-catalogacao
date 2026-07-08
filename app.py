@@ -51,9 +51,6 @@ with st.form("form_cadastro"):
         tit_c = col2.selectbox("Título", titulos_opcoes, key=f"tit_c_{i}")
         if nome_c:
             lista_coorientadores.append(f"{tit_c} {nome_c}")
-    
-    # ... (Restante do formulário)
-    submit_button = st.form_submit_button("Enviar dados")
 
     # Folhas e Bibliografia
     num_folhas = st.number_input("Número total de folhas", min_value=1, step=1)
