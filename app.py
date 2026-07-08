@@ -45,7 +45,6 @@ with st.form("form_cadastro"):
         )
     )
     
-    # Área de concentração movida para cá
     area_concentracao = st.radio(
         "Área de concentração",
         (
@@ -64,6 +63,11 @@ with st.form("form_cadastro"):
     num_folhas = st.number_input("Número total de folhas", min_value=1, step=1)
     st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
     st.info("💡 **Dica:** Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
+    
+    paginas_bibliografia = st.text_input(
+        "Páginas da Bibliografia", 
+        placeholder="Ex: 142 - 147"
+    )
     
     ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
     
@@ -88,5 +92,7 @@ if submit_button:
             if ilustracoes == "Sim":
                 resumo_folhas += " il."
             st.write(f"**Número de folhas:** {resumo_folhas}")
+            if paginas_bibliografia:
+                st.write(f"**Bibliografia:** p. {paginas_bibliografia}")
     else:
         st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
