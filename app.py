@@ -64,10 +64,8 @@ with st.form("form_cadastro"):
     st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
     st.info("💡 **Dica:** Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
     
-    paginas_bibliografia = st.text_input(
-        "Páginas da Bibliografia", 
-        placeholder="Ex: 142 - 147"
-    )
+    paginas_bibliografia = st.text_input("Páginas da Bibliografia", placeholder="Ex: 142 - 147")
+    st.caption("Informe o intervalo de páginas onde a Bibliografia se encontra")
     
     ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
     
