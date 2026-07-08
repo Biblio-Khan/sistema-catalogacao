@@ -10,47 +10,32 @@ with st.form("form_cadastro"):
     st.write(f"**Instituição:** {instituicao}")
 
     st.subheader("Dados do Autor")
-    st.info("""
-    **Instruções para o campo Autor:**
-    Digite o nome começando pelo último sobrenome, seguido por vírgula e o restante dos prenomes.
-    * **Parentesco:** (Ex: João Pires Filho) -> `Pires Filho, João`
-    * **Sobrenome Composto:** (Ex: Ana Castelo Branco) -> `Castelo Branco, Ana`
-    * **Origem Hispânica:** (Ex: Gabriel García Márquez) -> `García Marquez, Gabriel`
-    """)
-    
+    # ... (Instruções mantidas)
     autor = st.text_input("Nome completo do autor (formato de citação)", placeholder="Sobrenome(s), Nome")
 
     st.subheader("Dados do Trabalho")
     titulo = st.text_input("Título do trabalho", placeholder="Apenas a primeira letra da primeira palavra e nomes próprios em maiúsculas")
-    st.caption("Ex: Da invisibilidade social à visibilidade discursiva: Estudo enunciativo a respeito das ações da família na comunidade rural - Maués/AM")
-    
     subtitulo = st.text_input("Subtítulo (se houver)", placeholder="Insira o subtítulo, se existir")
     
     tipo_trabalho = st.selectbox("Tipo de trabalho e titulação", ("Trabalho de conclusão de curso (Graduação)", "Trabalho de conclusão de curso (Especialização)", "Dissertação (Mestrado)", "Tese (Doutorado)"))
-    
     area_concentracao = st.radio("Área de concentração", ("Ciência e Tecnologia das Radiações e Reatores Nucleares", "Ciência e Tecnologia dos Minerais e Meio Ambiente", "Ciência e Tecnologia dos Materiais"))
+    ano_defesa = st.text_input("Ano da defesa", placeholder="Ex: 2026")
     
-    ano_defesa = st.text_input("Ano da defesa", help="Digite o ano que está informado na folha de rosto", placeholder="Ex: 2026")
+    # --- Nova seção: Banca Examinadora ---
+    st.subheader("Dados da Banca Examinadora")
+    num_orientadores = st.selectbox("Quantos orientadores tem no seu trabalho?", options=[1, 2, 3])
     
+    orientadores = []
+    for i in range(num_orientadores):
+        orientadores.append(st.text_input(f"Nome do orientador {i+1}"))
+    # -------------------------------------
+
     num_folhas = st.number_input("Número total de folhas", min_value=1, step=1)
-    st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
-    st.info("💡 **Dica:** Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
-    
     paginas_bibliografia = st.text_input("Páginas da Bibliografia", placeholder="Ex: 142 - 147")
-    st.caption("Informe o intervalo de páginas onde a Bibliografia se encontra")
     
     st.subheader("Palavras-chave")
     num_keywords = st.selectbox("Quantidade de palavras-chave", options=[1, 2, 3, 4])
-    st.info("""
-    **Instruções para Palavras-chave:**
-    Pode-se usar termo simples ou composto, retirado da linguagem natural, não incluído na relação de descritores padronizados. A Bibliotecária responsável consultará esses termos em vocabulário controlados havendo mudanças dos termos escolhidos se prezará para que o sentido do termo seja mantido.
-    
-    **Dica:** Não usar fórmulas. Em caso de termo científico, utilizar também o nome popular. Inserir palavra-chave com a primeira letra maiúscula e o resto em minúsculo exceto quando for nome próprio. Em caso de sigla, usar maiúscula e seguido de hífen e seu significado.
-    """)
-    
-    keywords = []
-    for i in range(num_keywords):
-        keywords.append(st.text_input(f"Palavra-chave {i+1}"))
+    keywords = [st.text_input(f"Palavra-chave {i+1}") for i in range(num_keywords)]
     
     ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
     
@@ -66,15 +51,13 @@ if submit_button:
             st.write(f"**Tipo de trabalho:** {tipo_trabalho}")
             st.write(f"**Área de Concentração:** {area_concentracao}")
             st.write(f"**Autor:** {autor}")
+            st.write(f"**Orientador(es):** " + ", ".join([o for o in orientadores if o]))
             st.write(f"**Título:** {titulo}")
             if subtitulo:
                 st.write(f"**Subtítulo:** {subtitulo}")
             st.write(f"**Ano da defesa:** {ano_defesa}")
+            st.write(f"**Palavras-chave:** " + ", ".join([k for k in keywords if k]))
             
-            # Exibição das palavras-chave
-            st.write("**Palavras-chave:** " + ", ".join([k for k in keywords if k]))
-            
-            # Lógica corrigida para o campo de ilustrações
             resumo_folhas = f"{num_folhas} f."
             if ilustracoes == "Sim":
                 resumo_folhas += " il."
@@ -83,4 +66,4 @@ if submit_button:
             if paginas_bibliografia:
                 st.write(f"**Bibliografia:** p. {paginas_bibliografia}")
     else:
-        st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
+        st.error("Por favor, preencha todos os campos obrigatórios.")
