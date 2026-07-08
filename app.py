@@ -38,12 +38,9 @@ with st.form("form_cadastro"):
         placeholder="Ex: 2026"
     )
     
-    num_folhas = st.number_input(
-        "Número total de folhas", 
-        min_value=1, 
-        step=1,
-        help="Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto. Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas."
-    )
+    num_folhas = st.number_input("Número total de folhas", min_value=1, step=1)
+    st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
+    st.info("💡 **Dica:** Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
     
     submit_button = st.form_submit_button("Enviar dados")
 
