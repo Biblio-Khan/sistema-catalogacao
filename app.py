@@ -32,10 +32,12 @@ with st.form("form_cadastro"):
         placeholder="Insira o subtítulo, se existir"
     )
     
+    ano_defesa = st.text_input("Ano da defesa", placeholder="Ex: 2026")
+    
     submit_button = st.form_submit_button("Enviar dados")
 
 if submit_button:
-    if autor and titulo:
+    if autor and titulo and ano_defesa:
         if "," not in autor:
             st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
         else:
@@ -44,5 +46,6 @@ if submit_button:
             st.write(f"**Título:** {titulo}")
             if subtitulo:
                 st.write(f"**Subtítulo:** {subtitulo}")
+            st.write(f"**Ano da defesa:** {ano_defesa}")
     else:
-        st.error("Os campos Autor e Título são obrigatórios.")
+        st.error("Os campos Autor, Título e Ano da defesa são obrigatórios.")
