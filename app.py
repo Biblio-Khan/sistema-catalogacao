@@ -45,6 +45,16 @@ with st.form("form_cadastro"):
         )
     )
     
+    # Área de concentração movida para cá
+    area_concentracao = st.radio(
+        "Área de concentração",
+        (
+            "Ciência e Tecnologia das Radiações e Reatores Nucleares",
+            "Ciência e Tecnologia dos Minerais e Meio Ambiente",
+            "Ciência e Tecnologia dos Materiais"
+        )
+    )
+    
     ano_defesa = st.text_input(
         "Ano da defesa", 
         help="Digite o ano que está informado na folha de rosto",
@@ -67,6 +77,7 @@ if submit_button:
             st.success("Dados registrados com sucesso!")
             st.write(f"**Instituição:** {instituicao}")
             st.write(f"**Tipo de trabalho:** {tipo_trabalho}")
+            st.write(f"**Área de Concentração:** {area_concentracao}")
             st.write(f"**Autor:** {autor}")
             st.write(f"**Título:** {titulo}")
             if subtitulo:
