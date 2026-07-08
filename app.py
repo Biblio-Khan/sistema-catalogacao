@@ -7,7 +7,7 @@ st.title("Formulário de Elaboração de Ficha Catlográfica: Bib CDTN")
 def check_password():
     """Retorna True se o usuário inserir a senha correta."""
     def password_entered():
-        if st.session_state["password"] == "SenhaDoCDTN123": # Altere a senha aqui
+        if st.session_state["password"] == "BIB@CDTN": # Altere a senha aqui
             st.session_state["password_correct"] = True
         else:
             st.session_state["password_correct"] = False
