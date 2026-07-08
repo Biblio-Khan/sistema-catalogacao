@@ -2,46 +2,46 @@ import streamlit as st
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
-st.title("Formulário de Elaboração de Ficha Catlográfica: Bib CDTN")
+# --- FUNÇÃO: MODO BIBLIOTECÁRIA ---
+def interface_bibliotecaria():
+    st.header("Painel de Controle da Bibliotecária")
+    st.write("Aqui você processará as fichas pendentes.")
+    # Coloque aqui a lógica de consulta ao banco Turso/SQLite
 
+# --- FUNÇÃO: MODO ALUNO ---
+def formulario_aluno():
+    st.title("Formulário de Elaboração de Ficha Catalográfica: Bib CDTN")
+    st.info("Bem-vindo! Preencha o formulário abaixo.")
+    
+    # Coloque aqui TODO o código do formulário (Banca, Instituição, etc)
+    st.subheader("Dados da Instituição")
+    instituicao = "Centro de Desenvolvimento de Tecnologia Nuclear (CDTN)"
+    st.write(f"Instituição: {instituicao}")
+    # ... resto do seu formulário ...
+
+# --- FUNÇÃO: LOGIN ---
 def check_password():
-    """Retorna True se o usuário inserir a senha correta."""
     def password_entered():
-        if st.session_state["password"] == "BIB@CDTN": # Altere a senha aqui
+        if st.session_state["password"] == "BIB@CDTN":
             st.session_state["password_correct"] = True
         else:
             st.session_state["password_correct"] = False
             st.error("Senha incorreta")
 
     if "password_correct" not in st.session_state:
-        # Primeira vez que abre
         st.sidebar.text_input("Senha da Bibliotecária", type="password", on_change=password_entered, key="password")
         return False
-    elif not st.session_state["password_correct"]:
-        # Senha incorreta
-        st.sidebar.text_input("Senha da Bibliotecária", type="password", on_change=password_entered, key="password")
-        return False
-    else:
-        # Senha correta
-        return True
+    return st.session_state["password_correct"]
 
-# --- Lógica do Layout ---
-st.title("Sistema de Catalogação - CDTN")
-
-# Verifica se a senha foi digitada
+# --- FLUXO PRINCIPAL ---
 if check_password():
-    # MODO BIBLIOTECÁRIA
     st.sidebar.success("Acesso Liberado: Bibliotecária")
     if st.sidebar.button("Sair do Painel"):
         st.session_state["password_correct"] = False
         st.rerun()
-    # Chama aqui a sua função interface_bibliotecaria() que criamos antes
     interface_bibliotecaria()
 else:
-    # MODO ALUNO (Padrão)
-    st.info("Bem-vindo! Preencha o formulário abaixo para iniciar a catalogação.")
-    # Coloque aqui o formulário do aluno que você já construiu
-    st.write("--- Formulário do Aluno Aqui ---")
+    formulario_aluno()
 
 # --- Dados da Banca (FORA do form para garantir reatividade) ---
 st.subheader("Dados da Banca Examinadora")
