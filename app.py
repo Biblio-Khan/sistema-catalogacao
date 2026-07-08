@@ -25,15 +25,16 @@ with st.form("form_cadastro"):
         "Título do trabalho", 
         placeholder="Apenas a primeira letra da primeira palavra e nomes próprios em maiúsculas"
     )
+    st.caption("Ex: Da invisibilidade social à visibilidade discursiva: Estudo enunciativo a respeito das ações da família na comunidade rural - Maués/AM")
+    
     subtitulo = st.text_input(
         "Subtítulo (se houver)", 
-        placeholder="Insira o subtítulo após os dois pontos, se existir"
+        placeholder="Insira o subtítulo, se existir"
     )
     
     submit_button = st.form_submit_button("Enviar dados")
 
 if submit_button:
-    # Validação básica unificada
     if autor and titulo:
         if "," not in autor:
             st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
