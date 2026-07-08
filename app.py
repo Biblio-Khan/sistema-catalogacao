@@ -39,7 +39,6 @@ with st.form("form_cadastro"):
     paginas_bibliografia = st.text_input("Páginas da Bibliografia", placeholder="Ex: 142 - 147")
     st.caption("Informe o intervalo de páginas onde a Bibliografia se encontra")
     
-    # Nova seção de Palavras-chave
     st.subheader("Palavras-chave")
     num_keywords = st.selectbox("Quantidade de palavras-chave", options=[1, 2, 3, 4])
     st.info("""
@@ -75,10 +74,12 @@ if submit_button:
             # Exibição das palavras-chave
             st.write("**Palavras-chave:** " + ", ".join([k for k in keywords if k]))
             
+            # Lógica corrigida para o campo de ilustrações
             resumo_folhas = f"{num_folhas} f."
             if ilustracoes == "Sim":
                 resumo_folhas += " il."
             st.write(f"**Número de folhas:** {resumo_folhas}")
+            
             if paginas_bibliografia:
                 st.write(f"**Bibliografia:** p. {paginas_bibliografia}")
     else:
