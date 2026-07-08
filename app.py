@@ -5,16 +5,17 @@ st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 st.title("📚 Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
 
 with st.form("form_cadastro"):
+    # ... dentro do with st.form("form_cadastro"):
     st.subheader("Dados da Instituição")
     
     inst_opcoes = ["Centro de Desenvolvimento de Tecnologia Nuclear (CDTN)", "Outro"]
     instituicao_selecionada = st.selectbox("Instituição/Unidade acadêmica", inst_opcoes)
     
-    # Lógica condicional para o campo "Outro"
+    # Campo condicional
+    instituicao = instituicao_selecionada
     if instituicao_selecionada == "Outro":
-        instituicao = st.text_input("Digite o nome da sua unidade acadêmica:")
-    else:
-        instituicao = instituicao_selecionada
+        instituicao = st.text_input("Digite o nome da instituição:")
+    # ... restante do código
 
     st.subheader("Dados do Autor")
     
