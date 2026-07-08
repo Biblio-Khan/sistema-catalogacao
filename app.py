@@ -20,7 +20,6 @@ def check_password():
 def interface_bibliotecaria():
     st.header("Painel de Controle da Bibliotecária")
     st.write("Aqui você processará as fichas pendentes.")
-    # A integração com o Turso virá aqui futuramente
 
 def formulario_aluno():
     st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
@@ -30,7 +29,7 @@ def formulario_aluno():
     st.info("""
     **Instruções para Banca:**
     Selecione o número de membros e preencha seus respectivos nomes e titulações. 
-    As informações devem seguir o padrão acadêmico.
+    As informações devem seguir o padrão acadêmico, indicando corretamente o título (Dr., Dra., Me., Ma.).
     """)
     titulos_opcoes = ["Dr.", "Dra.", "Me.", "Ma."]
 
@@ -62,31 +61,53 @@ def formulario_aluno():
         st.write(f"Instituição: {instituicao}")
 
         st.subheader("Dados do Autor")
+        st.info("""
+        **Instruções para o campo Autor:**
+        Digite o nome começando pelo último sobrenome, seguido por vírgula e o restante dos prenomes.
+        * Parentesco: (Ex: João Pires Filho) -> Pires Filho, João
+        * Sobrenome Composto: (Ex: Ana Castelo Branco) -> Castelo Branco, Ana
+        * Origem Hispânica: (Ex: Gabriel García Márquez) -> García Marquez, Gabriel
+        """)
         autor = st.text_input("Nome completo do autor (formato de citação)", placeholder="Sobrenome(s), Nome")
 
         st.subheader("Dados do Trabalho")
-        titulo = st.text_input("Título do trabalho")
-        subtitulo = st.text_input("Subtítulo (se houver)")
-        tipo_trabalho = st.selectbox("Tipo de trabalho", ("Trabalho de conclusão de curso (Graduação)", "Trabalho de conclusão de curso (Especialização)", "Dissertação (Mestrado)", "Tese (Doutorado)"))
+        titulo = st.text_input("Título do trabalho", placeholder="Apenas a primeira letra da primeira palavra e nomes próprios em maiúsculas")
+        st.caption("Ex: Da invisibilidade social à visibilidade discursiva: Estudo enunciativo a respeito das ações da família na comunidade rural - Maués/AM")
+        subtitulo = st.text_input("Subtítulo (se houver)", placeholder="Insira o subtítulo, se existir")
+        
+        tipo_trabalho = st.selectbox("Tipo de trabalho e titulação", ("Trabalho de conclusão de curso (Graduação)", "Trabalho de conclusão de curso (Especialização)", "Dissertação (Mestrado)", "Tese (Doutorado)"))
         area_concentracao = st.radio("Área de concentração", ("Ciência e Tecnologia das Radiações e Reatores Nucleares", "Ciência e Tecnologia dos Minerais e Meio Ambiente", "Ciência e Tecnologia dos Materiais"))
-        ano_defesa = st.text_input("Ano da defesa")
+        ano_defesa = st.text_input("Ano da defesa", help="Digite o ano que está informado na folha de rosto", placeholder="Ex: 2026")
+        
         num_folhas = st.number_input("Número total de folhas", min_value=1, step=1)
-        paginas_bibliografia = st.text_input("Páginas da Bibliografia")
+        st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
+        st.info("Nota: Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
+        
+        paginas_bibliografia = st.text_input("Páginas da Bibliografia", placeholder="Ex: 142 - 147")
+        st.caption("Informe o intervalo de páginas onde a Bibliografia se encontra")
         
         st.subheader("Palavras-chave")
+        st.info("""
+        **Instruções para Palavras-chave:**
+        Pode-se usar termo simples ou composto, retirado da linguagem natural. A Bibliotecária responsável consultará esses termos em vocabulário controlado.
+        * Dica: Não usar fórmulas. Em caso de termo científico, utilizar também o nome popular.
+        * Formatação: Primeira letra maiúscula e o resto em minúsculo (exceto nome próprio).
+        * Siglas: Seguidas de hífen e seu significado.
+        """)
         num_keywords = st.selectbox("Quantidade de palavras-chave", options=[1, 2, 3, 4])
         keywords = [st.text_input(f"Palavra-chave {i+1}", key=f"kw_{i}") for i in range(num_keywords)]
+        
         ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
         
         submit_button = st.form_submit_button("Enviar dados")
 
     if submit_button:
+        # A lógica de processamento que você já tinha:
         if autor and titulo and ano_defesa and num_folhas:
             if "," not in autor:
                 st.warning("Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
             else:
                 st.success("Dados registrados com sucesso!")
-                # Lógica de exibição e salvamento aqui...
         else:
             st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
 
