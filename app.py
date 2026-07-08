@@ -38,10 +38,17 @@ with st.form("form_cadastro"):
         placeholder="Ex: 2026"
     )
     
+    num_folhas = st.number_input(
+        "Número total de folhas", 
+        min_value=1, 
+        step=1,
+        help="Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto. Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas."
+    )
+    
     submit_button = st.form_submit_button("Enviar dados")
 
 if submit_button:
-    if autor and titulo and ano_defesa:
+    if autor and titulo and ano_defesa and num_folhas:
         if "," not in autor:
             st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
         else:
@@ -51,5 +58,6 @@ if submit_button:
             if subtitulo:
                 st.write(f"**Subtítulo:** {subtitulo}")
             st.write(f"**Ano da defesa:** {ano_defesa}")
+            st.write(f"**Número de folhas:** {num_folhas}")
     else:
-        st.error("Os campos Autor, Título e Ano da defesa são obrigatórios.")
+        st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
