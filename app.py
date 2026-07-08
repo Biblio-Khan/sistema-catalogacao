@@ -19,15 +19,29 @@ with st.form("form_cadastro"):
         "Nome completo do autor (formato de citação)", 
         placeholder="Sobrenome(s), Nome"
     )
+
+    st.subheader("Dados do Trabalho")
+    titulo = st.text_input(
+        "Título do trabalho", 
+        placeholder="Apenas a primeira letra da primeira palavra e nomes próprios em maiúsculas"
+    )
+    subtitulo = st.text_input(
+        "Subtítulo (se houver)", 
+        placeholder="Insira o subtítulo após os dois pontos, se existir"
+    )
     
     submit_button = st.form_submit_button("Enviar dados")
 
 if submit_button:
-    if autor:
+    # Validação básica unificada
+    if autor and titulo:
         if "," not in autor:
-            st.warning("⚠️ Atenção: O formato do nome parece estar incorreto. Verifique se você usou a vírgula após o sobrenome.")
+            st.warning("⚠️ Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
         else:
-            st.success("Autor registrado!")
+            st.success("Dados registrados com sucesso!")
             st.write(f"**Autor:** {autor}")
+            st.write(f"**Título:** {titulo}")
+            if subtitulo:
+                st.write(f"**Subtítulo:** {subtitulo}")
     else:
-        st.error("O campo Autor é obrigatório.") 
+        st.error("Os campos Autor e Título são obrigatórios.")
