@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
-st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
+st.title("Formulário de Elaboração de Ficha Catlográfica: Bib CDTN")
 
 # --- Dados da Banca (FORA do form para garantir reatividade) ---
 st.subheader("Dados da Banca Examinadora")
