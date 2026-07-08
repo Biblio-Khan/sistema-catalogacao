@@ -32,7 +32,11 @@ with st.form("form_cadastro"):
         placeholder="Insira o subtítulo, se existir"
     )
     
-    ano_defesa = st.text_input("Ano da defesa", placeholder="Ex: 2026")
+    ano_defesa = st.text_input(
+        "Ano da defesa", 
+        help="Digite o ano que está informado na folha de rosto",
+        placeholder="Ex: 2026"
+    )
     
     submit_button = st.form_submit_button("Enviar dados")
 
