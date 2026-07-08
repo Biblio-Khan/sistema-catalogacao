@@ -42,6 +42,9 @@ with st.form("form_cadastro"):
     st.caption("Informe o número total de folhas do seu trabalho, começando a contagem a partir da folha de rosto.")
     st.info("💡 **Dica:** Inserir o número da última folha numerada. Olhe a numeração do documento e não a contagem de páginas.")
     
+    # Campo novo para ilustrações
+    ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
+    
     submit_button = st.form_submit_button("Enviar dados")
 
 if submit_button:
@@ -55,6 +58,12 @@ if submit_button:
             if subtitulo:
                 st.write(f"**Subtítulo:** {subtitulo}")
             st.write(f"**Ano da defesa:** {ano_defesa}")
-            st.write(f"**Número de folhas:** {num_folhas}")
+            
+            # Lógica para exibir 'il.' se houver ilustrações
+            resumo_folhas = f"{num_folhas} f."
+            if ilustracoes == "Sim":
+                resumo_folhas += " il."
+            
+            st.write(f"**Número de folhas:** {resumo_folhas}")
     else:
         st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
