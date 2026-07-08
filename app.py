@@ -35,7 +35,6 @@ if check_password():
     if st.sidebar.button("Sair do Painel"):
         st.session_state["password_correct"] = False
         st.rerun()
-    
     # Chama aqui a sua função interface_bibliotecaria() que criamos antes
     interface_bibliotecaria()
 
