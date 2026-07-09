@@ -1,8 +1,32 @@
 import streamlit as st
+from libsql_client import Client
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
-if "fichas_pendentes" not in st.session_state:
-    st.session_state["fichas_pendentes"] = []
+
+# --- CONFIGURAÇÃO DO BANCO ---
+def get_db():
+    # Isso busca a URL e o TOKEN lá dos "Secrets" do Streamlit Cloud
+    return Client(url=st.secrets["TURSO_URL"], auth_token=st.secrets["TURSO_TOKEN"])
+
+# --- FUNÇÕES DE DADOS ---
+def salvar_no_turso(dados):
+    db = get_db()
+    db.execute("""
+        INSERT INTO fichas (
+            instituicao, autor, titulo, subtitulo, tipo_trabalho, 
+            area_concentracao, ano_defesa, num_folhas, orientadores, 
+            coorientadores, keywords, ilustracoes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        dados['instituicao'], dados['autor'], dados['titulo'], dados['subtitulo'],
+        dados['tipo_trabalho'], dados['area_concentracao'], dados['ano_defesa'],
+        dados['num_folhas'], ", ".join(dados['orientadores']), 
+        ", ".join(dados['coorientadores']), ", ".join(dados['keywords']), dados['ilustracoes']
+    ))
+
+def carregar_fichas():
+    db = get_db()
+    return db.execute("SELECT * FROM fichas WHERE status = 'Pendente'").rows
 
 # --- FUNÇÕES ---
 
@@ -21,7 +45,15 @@ def check_password():
 
 def interface_bibliotecaria():
     st.header("Painel de Processamento Técnico")
+    fichas = carregar_fichas()
     
+    for ficha in fichas:
+        # ficha[0] é o ID, ficha[2] é o autor, etc.
+        st.write(f"**Autor:** {ficha[2]} | **Título:** {ficha[3]}")
+        with st.popover("Gerar Ficha"):
+            st.write(f"CDD: {ficha[14]}") # Coluna CDD
+            # Adicione aqui os inputs de edição e o botão para salvar/aprovar
+            st.warning("Use UPDATE no Turso para salvar CDD/Cutter")
     if not st.session_state["fichas_pendentes"]:
         st.info("Nenhuma ficha pendente.")
         return
@@ -131,7 +163,27 @@ def formulario_aluno():
         
         submit_button = st.form_submit_button("Enviar dados")
 
+        if st.form_submit_button("Enviar"):
+            # Mock dos dados para salvar
+            dados = {
+                "instituicao": "CDTN",
+                "autor": autor,
+                "titulo": titulo,
+                "subtitulo": "",
+                "tipo_trabalho": "Tese",
+                "area_concentracao": "Radiações",
+                "ano_defesa": "2026",
+                "num_folhas": 100,
+                "orientadores": ["Dr. Fulano"],
+                "coorientadores": [],
+                "keywords": ["Nuclear", "CDTN"],
+                "ilustracoes": "Não"
+            }
+            salvar_no_turso(dados)
+            st.success("Enviado com sucesso!")
+
     if submit_button:
+        
         # A lógica de processamento que você já tinha:
         if autor and titulo and ano_defesa and num_folhas:
             if "," not in autor:
