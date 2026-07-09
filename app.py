@@ -87,15 +87,18 @@ def carregar_fichas():
         cols = [c["name"] for c in data.get("result", {}).get("cols", [])]
         
         # Converte cada linha (que é uma lista de objetos) para um dicionário
+       # Converte cada linha para um dicionário de forma segura
         fichas_formatadas = []
         for row in rows:
-            # Pega o 'value' de cada campo
-            fichas_formatadas.append({cols[i]: item["value"] for i, item in enumerate(row)})
+            # Usamos .get("value") para evitar erro caso o campo seja NULL
+            linha_dict = {}
+            for i, item in enumerate(row):
+                col_name = cols[i]
+                # Se 'value' não existir (for NULL), salva como None
+                linha_dict[col_name] = item.get("value") if item is not None else None
+            fichas_formatadas.append(linha_dict)
             
         return fichas_formatadas
-    else:
-        st.error(f"Erro ao carregar: {response.text}")
-        return []
 # --- FUNÇÕES ---
 
 def check_password():
