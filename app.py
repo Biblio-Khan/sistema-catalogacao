@@ -181,13 +181,13 @@ def interface_bibliotecaria():
                     st.rerun()
 
             # Exibição do preview fora do form, mas dentro do expander
-            if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
-                st.write("### Preview da Ficha")
-                abrir_visualizacao_ficha(st.session_state.preview_ficha, st.session_state.preview_cdd, st.session_state.preview_cutter)
-                    st.session_state.preview_ficha, 
-                    st.session_state.preview_cdd, 
-                    st.session_state.preview_cutter
-                )
+                if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
+                    st.write("### Preview da Ficha")
+                    abrir_visualizacao_ficha(st.session_state.preview_ficha, st.session_state.preview_cdd, st.session_state.preview_cutter)
+                        st.session_state.preview_ficha, 
+                        st.session_state.preview_cdd, 
+                        st.session_state.preview_cutter
+                    )
             
             # Campos editáveis (iniciam com o valor atual do banco)
             novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{ficha['id']}")
