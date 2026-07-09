@@ -32,7 +32,7 @@ def carregar_fichas():
 
 def check_password():
     def password_entered():
-        if st.session_state["password"] == "BIB@CDTN":
+        if st.session_state["password"] == st.secrets["SENHA_BIBLIOTECARIA"]:
             st.session_state["password_correct"] = True
         else:
             st.session_state["password_correct"] = False
