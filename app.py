@@ -114,6 +114,27 @@ def check_password():
         return False
     return st.session_state["password_correct"]
 
+# Adicione esta função ao seu script
+def atualizar_ficha(id_ficha, cdd, cutter):
+    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
+    url = f"{base_url}/v1/execute"
+    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
+    
+    payload = {
+        "stmt": {
+            "sql": "UPDATE fichas SET cdd = ?, cutter = ?, status = 'Aprovado' WHERE id = ?",
+            "args": [
+                {"type": "text", "value": cdd},
+                {"type": "text", "value": cutter},
+                {"type": "integer", "value": id_ficha}
+            ]
+        }
+    }
+    
+    with httpx.Client() as client:
+        return client.post(url, headers=headers, json=payload)
+
+# Atualize a interface:
 def interface_bibliotecaria():
     st.title("Painel da Bibliotecária")
     fichas = carregar_fichas()
@@ -123,28 +144,24 @@ def interface_bibliotecaria():
         return
 
     for ficha in fichas:
-        # Troque o índice numérico pelo nome da coluna do seu banco
-        # Use o .get() para garantir que, se o campo estiver vazio, não quebre o código
+        # Acessando por chaves do dicionário (substitua pelos nomes reais das suas colunas)
+        f_id = ficha.get('id')
         st.write(f"**Autor:** {ficha.get('autor', 'N/A')}")
         st.write(f"**Título:** {ficha.get('titulo', 'N/A')}")
-        st.write(f"**Instituição:** {ficha.get('instituicao', 'N/A')}")
-        st.write("---")
-            with st.popover("Gerar Ficha / Catalogar"):
-                st.write(f"### Catalogando: {ficha[3]}")
-                
-                # Campos para a bibliotecária preencher
-                cdd = st.text_input("CDD", key=f"cdd_{ficha[0]}")
-                cutter = st.text_input("Cutter", key=f"cut_{ficha[0]}")
-                
-                if st.button("Finalizar Ficha e Aprovar", key=f"btn_{ficha[0]}"):
-                    # Atualiza o banco no Turso
-                    db = get_db()
-                    db.execute(
-                        "UPDATE fichas SET cdd = ?, cutter = ?, status = 'Aprovado' WHERE id = ?", 
-                        (cdd, cutter, ficha[0])
-                    )
+        
+        with st.popover("Gerar Ficha / Catalogar"):
+            st.write(f"### Catalogando: {ficha.get('titulo', 'Sem título')}")
+            
+            cdd = st.text_input("CDD", key=f"cdd_{f_id}")
+            cutter = st.text_input("Cutter", key=f"cut_{f_id}")
+            
+            if st.button("Finalizar Ficha e Aprovar", key=f"btn_{f_id}"):
+                response = atualizar_ficha(f_id, cdd, cutter)
+                if response.status_code == 200:
                     st.success("Ficha catalogada com sucesso!")
-                    st.rerun() # Atualiza a página para remover a ficha da lista
+                    st.rerun()
+                else:
+                    st.error("Erro ao atualizar o banco de dados.")
 
 def formulario_aluno():
     st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
