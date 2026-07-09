@@ -13,6 +13,11 @@ def get_db():
     )
 
 def salvar_no_turso(dados):
+    # Garantimos que a URL use o protocolo correto
+    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
+    url = f"{base_url}/v2/pipeline"
+    
+    token = st.secrets['TURSO_TOKEN']
     # Endpoint da API REST do Turso (baseado na sua URL)
     url = f"{st.secrets['TURSO_URL']}/v2/pipeline"
     token = st.secrets['TURSO_TOKEN']
