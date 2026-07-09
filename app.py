@@ -10,10 +10,6 @@ col1, col2 = st.columns([1, 4]) # Proporção 1:4 (Logo menor que o título)
 with col1:
     st.image(URL_LOGO, width=120)
 
-with col2:
-    st.title("Sistema de Catalogação")
-    st.subheader("Gerenciamento de Fichas e Normalização")
-
 st.divider()
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
