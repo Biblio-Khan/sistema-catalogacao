@@ -5,8 +5,7 @@ st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    # A biblioteca agora usa create_client para configurar a conexão
-    return create_client(
+    return create_sync_client(
         url=st.secrets["TURSO_URL"], 
         auth_token=st.secrets["TURSO_TOKEN"]
     )
