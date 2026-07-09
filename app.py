@@ -1,8 +1,26 @@
 import streamlit as st
 import httpx
 
-st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
-st.logo("logotipo-CDTN.png")
+URL_LOGO = "https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true"
+
+st.set_page_config(page_title="Sistema de Catalogação", layout="wide")
+
+# Adicionando a logo de forma institucional
+st.logo(URL_LOGO, link="https://www.suainstituicao.edu.br")
+
+# Opcional: Se a logo for muito grande ou estranha no st.logo, 
+# você pode usar o st.sidebar.image como alternativa para ter mais controle:
+with st.sidebar:
+    st.image(URL_LOGO, use_container_width=True)
+    st.write("---")
+    # Sua assinatura
+    st.markdown("""
+        <div style="font-size: 0.8rem; color: #003366;">
+            <strong>Sistema de Catalogação v1.0</strong><br>
+            Desenvolvido por: [Sabrina Lobeu]<br>
+            © 2026
+        </div>
+    """, unsafe_allow_html=True)
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
