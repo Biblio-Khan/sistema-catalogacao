@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#FF8C00" # Laranja (Cor de destaque, ideal para botões de ação como "Aprovar")
+backgroundColor = "#FFFFFF" # Fundo branco limpo
+secondaryBackgroundColor = "#E6F3FF" # Um tom de azul bem claro para os blocos de fundo
+textColor = "#003366" # Azul marinho profundo para textos (boa legibilidade)
+font = "sans serif"
