@@ -164,19 +164,23 @@ def interface_bibliotecaria():
     st.write("### Clique na ficha para editar:")
     
     for ficha in fichas:
-        # Título do expander: Exibe Autor e Título
         titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
         with st.expander(titulo_expander):
+            # 1. Definimos os inputs ANTES de usá-los no botão
+            # Usamos get para buscar o valor atual do banco, se existir
+            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{ficha['id']}")
+            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{ficha['id']}")
+            
+            # 2. Agora podemos usar novo_cdd e novo_cutter sem erro
             if st.button("Pré-visualizar Ficha", key=f"prev_{ficha['id']}"):
-                # Armazena os dados atuais na sessão para a visualização
                 st.session_state.preview_ficha = ficha
                 st.session_state.preview_cdd = novo_cdd
                 st.session_state.preview_cutter = novo_cutter
                 st.rerun()
 
-            # Se houver algo para visualizar, exibe
-            if "preview_ficha" in st.session_state:
+            # 3. Exibição condicional baseada no estado
+            if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
                 st.write("### Preview da Ficha")
                 abrir_visualizacao_ficha(
                     st.session_state.preview_ficha, 
