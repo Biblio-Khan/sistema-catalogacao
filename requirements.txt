@@ -1,5 +1,5 @@
 streamlit
-libsql-client>=0.2.0
+libsql-client
 requests
 pandas
 fpdf
