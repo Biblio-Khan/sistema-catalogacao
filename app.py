@@ -1,18 +1,16 @@
 import streamlit as st
-from libsql_client import create_client
+import libsql_client  
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    # Em vez de chamar a classe Client(), chamamos a função criadora
-    # A maioria das versões recentes do libsql-client prefere este método
-    return create_client(
+    # Removendo o 'sync=True' que causou o erro.
+    # O libsql-client moderno conecta automaticamente com os dados fornecidos.
+    return libsql_client.create_client(
         url=st.secrets["TURSO_URL"], 
-        auth_token=st.secrets["TURSO_TOKEN"],
-        sync=True
+        auth_token=st.secrets["TURSO_TOKEN"]
     )
-    
 def salvar_no_turso(dados):
     db = get_db()
     # Executa o INSERT de forma síncrona
