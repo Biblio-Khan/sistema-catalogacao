@@ -5,9 +5,11 @@ st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    if "TURSO_URL" not in st.secrets or "TURSO_TOKEN" not in st.secrets:
-        st.error("Erro: Credenciais do Turso (URL/TOKEN) não encontradas nos Secrets.")
-        st.stop() # Para a execução aqui e avisa o erro
+    # A biblioteca agora usa create_client para configurar a conexão
+    return create_client(
+        url=st.secrets["TURSO_URL"], 
+        auth_token=st.secrets["TURSO_TOKEN"]
+    )
     
     return Client(url=st.secrets["TURSO_URL"], auth_token=st.secrets["TURSO_TOKEN"])
 # --- FUNÇÕES DE DADOS ---
