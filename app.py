@@ -193,6 +193,9 @@ def formulario_aluno():
         else:
             st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
 
+if __name__ == "__main__":
+    formulario_aluno()
+
 
 # --- FLUXO PRINCIPAL ---
 if check_password():
