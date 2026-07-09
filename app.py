@@ -163,17 +163,18 @@ def interface_bibliotecaria():
 
     st.write("### Clique na ficha para editar:")
     
-    for ficha in fichas:
+    for i, ficha in enumerate (fichas):
         titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
         with st.expander(titulo_expander):
             # 1. Definimos os inputs ANTES de usá-los no botão
             # Usamos get para buscar o valor atual do banco, se existir
-            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{ficha['id']}")
-            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{ficha['id']}")
+            key_id = ficha.get ( 'id', i)
+            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{key_id}_{i}")
+            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{key_id}_{i}")
             
             # 2. Agora podemos usar novo_cdd e novo_cutter sem erro
-            if st.button("Pré-visualizar Ficha", key=f"prev_{ficha['id']}"):
+            if st.button("Pré-visualizar Ficha", key=f"prev_{key_id}_{i}"):
                 st.session_state.preview_ficha = ficha
                 st.session_state.preview_cdd = novo_cdd
                 st.session_state.preview_cutter = novo_cutter
