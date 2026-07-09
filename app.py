@@ -115,7 +115,7 @@ def check_password():
     return st.session_state["password_correct"]
 
 def interface_bibliotecaria():
-    st.header("📋 Painel de Processamento Técnico")
+    st.title("Painel da Bibliotecária")
     fichas = carregar_fichas()
     
     if not fichas:
@@ -123,11 +123,12 @@ def interface_bibliotecaria():
         return
 
     for ficha in fichas:
-        # ficha[0]=id, ficha[2]=autor, ficha[3]=titulo
-        with st.container(border=True):
-            st.write(f"**Autor:** {ficha[2]}")
-            st.write(f"**Título:** {ficha[3]}")
-            
+        # Troque o índice numérico pelo nome da coluna do seu banco
+        # Use o .get() para garantir que, se o campo estiver vazio, não quebre o código
+        st.write(f"**Autor:** {ficha.get('autor', 'N/A')}")
+        st.write(f"**Título:** {ficha.get('titulo', 'N/A')}")
+        st.write(f"**Instituição:** {ficha.get('instituicao', 'N/A')}")
+        st.write("---")
             with st.popover("Gerar Ficha / Catalogar"):
                 st.write(f"### Catalogando: {ficha[3]}")
                 
