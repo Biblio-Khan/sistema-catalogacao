@@ -61,7 +61,6 @@ def salvar_no_turso(dados):
         st.error(f"Erro ao salvar: {response.text}")
 
 def carregar_fichas():
-    # URL configurada para consulta
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
     url = f"{base_url}/v1/execute"
     
@@ -70,24 +69,29 @@ def carregar_fichas():
         "Content-Type": "application/json"
     }
     
-    # Payload para realizar a consulta (SELECT)
-    payload = {
-        "stmt": {
-            "sql": "SELECT * FROM fichas ORDER BY id DESC"
-        }
-    }
+    payload = {"stmt": {"sql": "SELECT * FROM fichas"}}
     
     with httpx.Client() as client:
         response = client.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
         data = response.json()
-        # O Turso retorna os resultados dentro de 'results' -> 'rows'
-        return data.get("results", {}).get("rows", [])
-    else:
-        st.error(f"Erro ao carregar fichas: {response.text}")
+        
+        # DEBUG: Vamos ver o que o Turso está entregando
+        # st.write(data) # Descomente essa linha para ver o retorno na tela do app
+        
+        # Muitas versões da API REST do Turso retornam em 'results' -> 'rows'
+        # ou apenas 'results'. Vamos testar o formato comum:
+        results = data.get("results", [])
+        
+        # Se results for uma lista, vamos retornar as linhas (rows)
+        if isinstance(results, list) and len(results) > 0:
+            return results[0].get("rows", [])
+            
         return []
-
+    else:
+        st.error(f"Erro ao conectar: {response.text}")
+        return []
 # --- FUNÇÕES ---
 
 def check_password():
