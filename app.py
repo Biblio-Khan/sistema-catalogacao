@@ -69,24 +69,33 @@ def carregar_fichas():
         "Content-Type": "application/json"
     }
     
-    # Tentando uma consulta simples para ver se o banco responde
-    payload = {"stmt": {"sql": "SELECT count(*) FROM fichas"}}
+    # Agora pedimos todos os dados
+    payload = {"stmt": {"sql": "SELECT * FROM fichas"}}
     
     with httpx.Client() as client:
-        try:
-            response = client.post(url, headers=headers, json=payload)
-            data = response.json()
+        response = client.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Acesso direto ao formato que você enviou:
+        # O Turso entrega em 'result' (singular) e dentro dele 'rows'
+        rows = data.get("result", {}).get("rows", [])
+        
+        # Se você quiser transformar isso em algo mais fácil de usar (dicionários):
+        # As colunas estão em data["result"]["cols"]
+        cols = [c["name"] for c in data.get("result", {}).get("cols", [])]
+        
+        # Converte cada linha (que é uma lista de objetos) para um dicionário
+        fichas_formatadas = []
+        for row in rows:
+            # Pega o 'value' de cada campo
+            fichas_formatadas.append({cols[i]: item["value"] for i, item in enumerate(row)})
             
-            # MOSTRA TUDO NA TELA PARA DEBUGAR
-            st.write("Resposta completa do Turso:", data)
-            
-            # Se for sucesso, tenta extrair a contagem
-            if "results" in data:
-                return data["results"][0]["rows"]
-            return []
-        except Exception as e:
-            st.error(f"Erro na requisição: {e}")
-            return []
+        return fichas_formatadas
+    else:
+        st.error(f"Erro ao carregar: {response.text}")
+        return []
 # --- FUNÇÕES ---
 
 def check_password():
