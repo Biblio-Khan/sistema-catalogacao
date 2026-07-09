@@ -219,7 +219,7 @@ def interface_bibliotecaria():
                         st.error("Erro ao salvar no banco.")
                     
 def formulario_aluno():
-    st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
+    st.title("Formulário de Ficha Catalográfica")
 
     # --- Dados da Banca ---
     st.subheader("Dados da Banca Examinadora")
