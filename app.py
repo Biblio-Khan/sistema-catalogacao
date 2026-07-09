@@ -5,16 +5,17 @@ st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    # Removendo o 'sync=True' que causou o erro.
-    # O libsql-client moderno conecta automaticamente com os dados fornecidos.
-    return libsql_client.create_client(
-        url=st.secrets["TURSO_URL"], 
+    # Esta versão é síncrona e funciona perfeitamente no fluxo do Streamlit
+    return libsql.connect(
+        database="fichas.db", # Pode ser o nome do seu banco
+        sync_url=st.secrets["TURSO_URL"],
         auth_token=st.secrets["TURSO_TOKEN"]
     )
+
 def salvar_no_turso(dados):
     db = get_db()
-    # Executa o INSERT de forma síncrona
-    db.execute("""
+    cursor = db.cursor()
+    cursor.execute("""
         INSERT INTO fichas (
             instituicao, autor, titulo, subtitulo, tipo_trabalho, 
             area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
@@ -27,6 +28,8 @@ def salvar_no_turso(dados):
         dados['orientadores'], dados['coorientadores'], 
         dados['keywords'], dados['ilustracoes']
     ))
+    db.commit() # Importante: salvar a transação
+    db.close()
 
 def carregar_fichas():
     db = get_db()
