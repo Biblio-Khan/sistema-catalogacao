@@ -81,34 +81,34 @@ def formulario_aluno():
 
     # --- Dados da Banca ---
     st.subheader("Dados da Banca Examinadora")
-    st.info("""
-    **Instruções para Banca:**
-    Selecione o número de membros e preencha seus respectivos nomes e titulações. 
-    As informações devem seguir o padrão acadêmico, indicando corretamente o título (Dr., Dra., Me., Ma.).
-    """)
     titulos_opcoes = ["Dr.", "Dra.", "Me.", "Ma."]
 
     st.write("### Orientador(es)")
-    num_orientadores = st.selectbox("Quantos orientadores tem no seu trabalho?", options=[1, 2, 3], key="qtd_o")
+    # REMOVI A KEY OU MUDAMOS PARA ALGO MAIS ESPECÍFICO
+    num_orientadores = st.selectbox("Quantos orientadores tem no seu trabalho?", options=[1, 2, 3]) 
+    
     lista_orientadores = []
     for i in range(num_orientadores):
         col1, col2 = st.columns([3, 1])
-        nome_o = col1.text_input(f"Nome do orientador {i+1}", key=f"nome_o_{i}")
-        tit_o = col2.selectbox("Título", titulos_opcoes, key=f"tit_o_{i}")
+        # Adicionamos um prefixo único para garantir que não haja conflito
+        nome_o = col1.text_input(f"Nome do orientador {i+1}", key=f"orientador_nome_{i}")
+        tit_o = col2.selectbox("Título", titulos_opcoes, key=f"orientador_tit_{i}")
         if nome_o:
             lista_orientadores.append(f"{tit_o} {nome_o}")
 
     st.write("### Coorientador(es)")
-    num_coorientadores = st.selectbox("Quantos coorientadores tem no seu trabalho?", options=[0, 1, 2, 3], key="qtd_c")
+    num_coorientadores = st.selectbox("Quantos coorientadores tem no seu trabalho?", options=[0, 1, 2, 3])
+    
     lista_coorientadores = []
     if num_coorientadores > 0:
         for i in range(num_coorientadores):
             col1, col2 = st.columns([3, 1])
-            nome_c = col1.text_input(f"Nome do coorientador {i+1}", key=f"nome_c_{i}")
-            tit_c = col2.selectbox("Título", titulos_opcoes, key=f"tit_c_{i}")
+            nome_c = col1.text_input(f"Nome do coorientador {i+1}", key=f"coorientador_nome_{i}")
+            tit_c = col2.selectbox("Título", titulos_opcoes, key=f"coorientador_tit_{i}")
             if nome_c:
                 lista_coorientadores.append(f"{tit_c} {nome_c}")
 
+    
     # --- Formulário de Envio ---
     with st.form("form_dados_gerais"):
         st.subheader("Dados da Instituição")
