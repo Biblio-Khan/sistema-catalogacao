@@ -13,42 +13,44 @@ def get_db():
     )
 
 def salvar_no_turso(dados):
-    # Garantimos que a URL use o protocolo correto
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
-    url = f"{base_url}/v2/pipeline"
+    url = f"{base_url}/v1/execute"
     
     token = st.secrets['TURSO_TOKEN']
-    # Endpoint da API REST do Turso (baseado na sua URL)
-    url = f"{st.secrets['TURSO_URL']}/v2/pipeline"
-    token = st.secrets['TURSO_TOKEN']
-    
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     
-    # Preparando o SQL
-    sql = """
-    INSERT INTO fichas (
-        instituicao, autor, titulo, subtitulo, tipo_trabalho, 
-        area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
-        orientadores, coorientadores, keywords, ilustracoes
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """
-    
+    # O Turso espera os argumentos neste formato: [{"type": "text", "value": "exemplo"}]
+    # ou simplesmente uma lista de valores. Vamos tentar o formato esperado pela API REST:
     payload = {
-        "requests": [
-            {"type": "execute", "stmt": {"sql": sql, "args": [
-                dados['instituicao'], dados['autor'], dados['titulo'], dados['subtitulo'],
-                dados['tipo_trabalho'], dados['area_concentracao'], dados['ano_defesa'],
-                dados['num_folhas'], dados['paginas_bibliografia'], 
-                dados['orientadores'], dados['coorientadores'], 
-                dados['keywords'], dados['ilustracoes']
-            ]}}
-        ]
+        "statement": {
+            "sql": """
+            INSERT INTO fichas (
+                instituicao, autor, titulo, subtitulo, tipo_trabalho, 
+                area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
+                orientadores, coorientadores, keywords, ilustracoes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            "args": [
+                {"type": "text", "value": dados['instituicao']},
+                {"type": "text", "value": dados['autor']},
+                {"type": "text", "value": dados['titulo']},
+                {"type": "text", "value": dados['subtitulo']},
+                {"type": "text", "value": dados['tipo_trabalho']},
+                {"type": "text", "value": dados['area_concentracao']},
+                {"type": "text", "value": str(dados['ano_defesa'])}, # Garante que seja string
+                {"type": "text", "value": str(dados['num_folhas'])},
+                {"type": "text", "value": dados['paginas_bibliografia']},
+                {"type": "text", "value": dados['orientadores']},
+                {"type": "text", "value": dados['coorientadores']},
+                {"type": "text", "value": dados['keywords']},
+                {"type": "text", "value": dados['ilustracoes']}
+            ]
+        }
     }
 
-    # Execução síncrona usando httpx
     with httpx.Client() as client:
         response = client.post(url, headers=headers, json=payload)
         
