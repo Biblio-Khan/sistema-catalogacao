@@ -69,29 +69,24 @@ def carregar_fichas():
         "Content-Type": "application/json"
     }
     
-    payload = {"stmt": {"sql": "SELECT * FROM fichas"}}
+    # Tentando uma consulta simples para ver se o banco responde
+    payload = {"stmt": {"sql": "SELECT count(*) FROM fichas"}}
     
     with httpx.Client() as client:
-        response = client.post(url, headers=headers, json=payload)
-    
-    if response.status_code == 200:
-        data = response.json()
-        
-        # DEBUG: Vamos ver o que o Turso está entregando
-        # st.write(data) # Descomente essa linha para ver o retorno na tela do app
-        
-        # Muitas versões da API REST do Turso retornam em 'results' -> 'rows'
-        # ou apenas 'results'. Vamos testar o formato comum:
-        results = data.get("results", [])
-        
-        # Se results for uma lista, vamos retornar as linhas (rows)
-        if isinstance(results, list) and len(results) > 0:
-            return results[0].get("rows", [])
+        try:
+            response = client.post(url, headers=headers, json=payload)
+            data = response.json()
             
-        return []
-    else:
-        st.error(f"Erro ao conectar: {response.text}")
-        return []
+            # MOSTRA TUDO NA TELA PARA DEBUGAR
+            st.write("Resposta completa do Turso:", data)
+            
+            # Se for sucesso, tenta extrair a contagem
+            if "results" in data:
+                return data["results"][0]["rows"]
+            return []
+        except Exception as e:
+            st.error(f"Erro na requisição: {e}")
+            return []
 # --- FUNÇÕES ---
 
 def check_password():
