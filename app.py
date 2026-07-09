@@ -156,28 +156,30 @@ def abrir_visualizacao_ficha(ficha, cdd, cutter):
 def interface_bibliotecaria():
     st.title("Painel da Bibliotecária")
     fichas = carregar_fichas()
+    
     if not fichas:
+        st.info("Nenhuma ficha pendente no momento.")
         return
 
-    # Usamos o enumerate para garantir chaves únicas
     for i, ficha in enumerate(fichas):
-        f_id = ficha.get('id', i)
-        titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
+        f_id = ficha.get('id')
+        # Título do expander
+        titulo_expander = f"{ficha.get('autor', 'Sem autor')} - {ficha.get('titulo', 'Sem título')}"
         
-       with st.expander(titulo_expander):
-            # 1. Campos de Edição (Únicos)
+        with st.expander(titulo_expander):
+            # 1. Campos de edição (identificados de forma única)
             novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{f_id}_{i}")
             novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{f_id}_{i}")
             
-            # 2. Botão de Preview
+            # 2. Botão de Preview: armazena os valores no session_state
             if st.button("Pré-visualizar Ficha", key=f"prev_{f_id}_{i}"):
                 st.session_state.preview_ficha = ficha
                 st.session_state.preview_cdd = novo_cdd
                 st.session_state.preview_cutter = novo_cutter
                 st.rerun()
 
-            # 3. Se houver preview, mostra a ficha E o botão de salvar logo abaixo
-            if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
+            # 3. Exibição do Preview (apenas se for o clique desta ficha)
+            if "preview_ficha" in st.session_state and st.session_state.preview_ficha.get('id') == f_id:
                 st.write("---")
                 st.write("### Preview da Ficha")
                 abrir_visualizacao_ficha(
@@ -186,16 +188,17 @@ def interface_bibliotecaria():
                     st.session_state.preview_cutter
                 )
                 
-                # O botão de Salvar só aparece depois que o preview for gerado
+                # 4. Botão de Salvar (exibido apenas no bloco de visualização)
                 if st.button("Finalizar e Aprovar", key=f"save_{f_id}_{i}"):
                     response = atualizar_ficha(f_id, st.session_state.preview_cdd, st.session_state.preview_cutter)
                     if response.status_code == 200:
                         st.success("Ficha catalogada com sucesso!")
-                        # Removemos o preview do estado para limpar a tela
-                        del st.session_state.preview_ficha
+                        # Limpa o estado para esconder o preview e o botão salvar
+                        if "preview_ficha" in st.session_state:
+                            del st.session_state.preview_ficha
                         st.rerun()
-                else:
-                    st.error("Erro ao salvar no banco de dados.")
+                    else:
+                        st.error("Erro ao salvar no banco.")
                     
 def formulario_aluno():
     st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
