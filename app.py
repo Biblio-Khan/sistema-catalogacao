@@ -1,5 +1,5 @@
 import streamlit as st
-import libsql_experimental as libsql
+import httpx
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
@@ -13,23 +13,44 @@ def get_db():
     )
 
 def salvar_no_turso(dados):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("""
-        INSERT INTO fichas (
-            instituicao, autor, titulo, subtitulo, tipo_trabalho, 
-            area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
-            orientadores, coorientadores, keywords, ilustracoes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        dados['instituicao'], dados['autor'], dados['titulo'], dados['subtitulo'],
-        dados['tipo_trabalho'], dados['area_concentracao'], dados['ano_defesa'],
-        dados['num_folhas'], dados['paginas_bibliografia'], 
-        dados['orientadores'], dados['coorientadores'], 
-        dados['keywords'], dados['ilustracoes']
-    ))
-    db.commit() # Importante: salvar a transação
-    db.close()
+    # Endpoint da API REST do Turso (baseado na sua URL)
+    url = f"{st.secrets['TURSO_URL']}/v2/pipeline"
+    token = st.secrets['TURSO_TOKEN']
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    # Preparando o SQL
+    sql = """
+    INSERT INTO fichas (
+        instituicao, autor, titulo, subtitulo, tipo_trabalho, 
+        area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
+        orientadores, coorientadores, keywords, ilustracoes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """
+    
+    payload = {
+        "requests": [
+            {"type": "execute", "stmt": {"sql": sql, "args": [
+                dados['instituicao'], dados['autor'], dados['titulo'], dados['subtitulo'],
+                dados['tipo_trabalho'], dados['area_concentracao'], dados['ano_defesa'],
+                dados['num_folhas'], dados['paginas_bibliografia'], 
+                dados['orientadores'], dados['coorientadores'], 
+                dados['keywords'], dados['ilustracoes']
+            ]}}
+        ]
+    }
+
+    # Execução síncrona usando httpx
+    with httpx.Client() as client:
+        response = client.post(url, headers=headers, json=payload)
+        
+    if response.status_code == 200:
+        st.success("Dados enviados com sucesso!")
+    else:
+        st.error(f"Erro ao salvar: {response.text}")
 
 def carregar_fichas():
     db = get_db()
