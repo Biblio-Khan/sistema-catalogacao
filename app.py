@@ -1,7 +1,7 @@
 import streamlit as st
 import httpx
 
-URL_LOGO = "https://cdn.jsdelivr.net/gh/SEU_USUARIO/SEU_REPOSITORIO@main/logo.png"
+URL_LOGO = "https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true"
 
 st.set_page_config(page_title="Sistema de Catalogação", layout="wide")
 
