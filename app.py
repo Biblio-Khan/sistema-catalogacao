@@ -1,22 +1,33 @@
 import streamlit as st
-from libsql_client import Client
+import libsql_client
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    # Instanciamos o cliente desta forma para versões que não suportam o sync direto
-    return Client(
+    # Usamos o caminho completo da biblioteca para evitar erros de importação
+    return libsql_client.Client(
         url=st.secrets["TURSO_URL"], 
-        auth_token=st.secrets["TURSO_TOKEN"]
+        auth_token=st.secrets["TURSO_TOKEN"],
+        sync=True  # ISSO resolve o erro de "no running event loop"
     )
 
 def salvar_no_turso(dados):
     db = get_db()
-    # Usamos o .execute como comando direto
-    db.execute("INSERT INTO fichas (...) VALUES (...)", (...))
-    # Em muitas versões, o Client precisa ser fechado se não for síncrono
-    db.close()
+    # Executa o INSERT de forma síncrona
+    db.execute("""
+        INSERT INTO fichas (
+            instituicao, autor, titulo, subtitulo, tipo_trabalho, 
+            area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
+            orientadores, coorientadores, keywords, ilustracoes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        dados['instituicao'], dados['autor'], dados['titulo'], dados['subtitulo'],
+        dados['tipo_trabalho'], dados['area_concentracao'], dados['ano_defesa'],
+        dados['num_folhas'], dados['paginas_bibliografia'], 
+        dados['orientadores'], dados['coorientadores'], 
+        dados['keywords'], dados['ilustracoes']
+    ))
 
 def carregar_fichas():
     db = get_db()
