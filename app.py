@@ -1,17 +1,18 @@
 import streamlit as st
-import libsql_client
+from libsql_client import create_client
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    # Usamos o caminho completo da biblioteca para evitar erros de importação
-    return libsql_client.Client(
+    # Em vez de chamar a classe Client(), chamamos a função criadora
+    # A maioria das versões recentes do libsql-client prefere este método
+    return create_client(
         url=st.secrets["TURSO_URL"], 
         auth_token=st.secrets["TURSO_TOKEN"],
-        sync=True  # ISSO resolve o erro de "no running event loop"
+        sync=True
     )
-
+    
 def salvar_no_turso(dados):
     db = get_db()
     # Executa o INSERT de forma síncrona
