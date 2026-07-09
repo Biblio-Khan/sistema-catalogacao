@@ -156,34 +156,34 @@ def abrir_visualizacao_ficha(ficha, cdd, cutter):
 def interface_bibliotecaria():
     st.title("Painel da Bibliotecária")
     fichas = carregar_fichas()
-    
     if not fichas:
-        st.info("Nenhuma ficha pendente no momento.")
         return
 
-    st.write("### Clique na ficha para editar:")
-    
-    for i, ficha in enumerate (fichas):
+    # Usamos o enumerate para garantir chaves únicas
+    for i, ficha in enumerate(fichas):
+        f_id = ficha.get('id', i)
         titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
         with st.expander(titulo_expander):
-            # 1. Definimos os inputs ANTES de usá-los no botão
-            # Usamos get para buscar o valor atual do banco, se existir
-            key_id = ficha.get ( 'id', i)
-            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{key_id}_{i}")
-            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{key_id}_{i}")
-            
-            # 2. Agora podemos usar novo_cdd e novo_cutter sem erro
-            if st.button("Pré-visualizar Ficha", key=f"prev_{key_id}_{i}"):
-                st.session_state.preview_ficha = ficha
-                st.session_state.preview_cdd = novo_cdd
-                st.session_state.preview_cutter = novo_cutter
-                st.rerun()
+            # DEFINIÇÃO ÚNICA DOS CAMPOS
+            # Se você estiver usando st.form, coloque os inputs DENTRO do form
+            with st.form(key=f"form_{f_id}_{i}"):
+                novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''))
+                novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''))
+                
+                submitted = st.form_submit_button("Pré-visualizar e Salvar")
+                
+                if submitted:
+                    # Lógica de salvar e atualizar o preview
+                    st.session_state.preview_ficha = ficha
+                    st.session_state.preview_cdd = novo_cdd
+                    st.session_state.preview_cutter = novo_cutter
+                    st.rerun()
 
-            # 3. Exibição condicional baseada no estado
+            # Exibição do preview fora do form, mas dentro do expander
             if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
                 st.write("### Preview da Ficha")
-                abrir_visualizacao_ficha(
+                abrir_visualizacao_ficha(st.session_state.preview_ficha, st.session_state.preview_cdd, st.session_state.preview_cutter)
                     st.session_state.preview_ficha, 
                     st.session_state.preview_cdd, 
                     st.session_state.preview_cutter
