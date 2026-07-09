@@ -165,23 +165,18 @@ def interface_bibliotecaria():
         titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
         with st.expander(titulo_expander):
-            # DEFINIÇÃO ÚNICA DOS CAMPOS
-            # Se você estiver usando st.form, coloque os inputs DENTRO do form
-            with st.form(key=f"form_{f_id}_{i}"):
-                novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''))
-                novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''))
-                
-                submitted = st.form_submit_button("Pré-visualizar e Salvar")
-                
-                if submitted:
-                    # Lógica de salvar e atualizar o preview
-                    st.session_state.preview_ficha = ficha
-                    st.session_state.preview_cdd = novo_cdd
-                    st.session_state.preview_cutter = novo_cutter
-                    st.rerun()
+            # Apenas UMA definição dos campos, sem st.form
+            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{f_id}_{i}")
+            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{f_id}_{i}")
+            
+            # Botão de Preview
+            if st.button("Pré-visualizar Ficha", key=f"prev_{f_id}_{i}"):
+                st.session_state.preview_ficha = ficha
+                st.session_state.preview_cdd = novo_cdd
+                st.session_state.preview_cutter = novo_cutter
+                st.rerun()
 
-            # Exibição do preview fora do form, mas dentro do expander
-            # Verifica se o preview deve ser mostrado para esta ficha específica
+            # Área de Visualização
             if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
                 st.write("### Preview da Ficha")
                 abrir_visualizacao_ficha(
