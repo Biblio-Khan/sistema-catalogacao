@@ -1,5 +1,5 @@
 import streamlit as st
-from libsql_client import Client
+from libsql_client import create_client
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
