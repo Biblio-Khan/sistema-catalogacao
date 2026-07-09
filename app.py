@@ -1,25 +1,35 @@
 import streamlit as st
 import httpx
 
+# URL da sua logo (via jsDelivr)
+URL_LOGO = "https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true"
+
+
+# --- CABEÇALHO PRINCIPAL (Topo da página) ---
+# Você pode escolher o layout: Logo + Título Lado a Lado
+col1 = st.columns([1, 5]) 
+
+with col1:
+    st.image(URL_LOGO, width=120)
+
+
+st.markdown("""<hr style="height:2px; border:none; color:#003366; background-color:#003366;" />""", unsafe_allow_html=True)
+
+# --- BARRA LATERAL (Sidebar) ---
 with st.sidebar:
-    # 1. Logo institucional
-    st.image("https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true", width=150)
+    st.image(URL_LOGO, width=150) # Logo repetida na sidebar para identificação rápida
     
-    # Linha divisória personalizada com a cor da biblioteca
-    st.markdown("""
-        <hr style="height:2px; border:none; color:#003366; background-color:#003366;" />
-    """, unsafe_allow_html=True)
+    st.markdown("""<hr style="height:2px; border:none; color:#003366; background-color:#003366;" />""", unsafe_allow_html=True)
     
-    # 2. Espaço para o menu ou outras funcionalidades que você já tem
-    # st.write("Menu Principal...") 
+    # ... aqui entram seus filtros, botões de status e navegação ...
     
-    # 3. Rodapé fixo com sua assinatura
+    # Rodapé da Sidebar (Sua Assinatura)
     st.markdown("""
         <div style="margin-top: auto; padding-top: 20px; text-align: center;">
-            <p style="font-size: 0.75rem; color: #003366; line-height: 1.2;">
+            <p style="font-size: 0.75rem; color: #003366;">
                 <strong>Sistema de Catalogação v1.0</strong><br>
-                Desenvolvido por: <strong>Sabrina Lobeu</strong><br>
-                <em>© 2026 - BiblioKhan</em>
+                Desenvolvido por: <strong>Seu Nome</strong><br>
+                <em>© 2026 - Gestão de Acervo</em>
             </p>
         </div>
     """, unsafe_allow_html=True)
