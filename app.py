@@ -143,26 +143,32 @@ def interface_bibliotecaria():
         st.info("Nenhuma ficha pendente no momento.")
         return
 
+    st.write("### Clique na ficha para editar:")
+    
     for ficha in fichas:
-        # Acessando por chaves do dicionário (substitua pelos nomes reais das suas colunas)
-        f_id = ficha.get('id')
-        st.write(f"**Autor:** {ficha.get('autor', 'N/A')}")
-        st.write(f"**Título:** {ficha.get('titulo', 'N/A')}")
+        # Título do expander: Exibe Autor e Título
+        titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
-        with st.popover("Gerar Ficha / Catalogar"):
-            st.write(f"### Catalogando: {ficha.get('titulo', 'Sem título')}")
+        with st.expander(titulo_expander):
+            # Exibição dos dados atuais (somente leitura)
+            st.write(f"**Instituição:** {ficha.get('instituicao')}")
+            st.write(f"**Ano:** {ficha.get('ano_defesa')}")
+            st.write("---")
             
-            cdd = st.text_input("CDD", key=f"cdd_{f_id}")
-            cutter = st.text_input("Cutter", key=f"cut_{f_id}")
+            # Campos editáveis (iniciam com o valor atual do banco)
+            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{ficha['id']}")
+            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{ficha['id']}")
             
-            if st.button("Finalizar Ficha e Aprovar", key=f"btn_{f_id}"):
-                response = atualizar_ficha(f_id, cdd, cutter)
+            # Botão para salvar a alteração
+            if st.button("Salvar e Aprovar Ficha", key=f"btn_{ficha['id']}"):
+                response = atualizar_ficha(ficha['id'], novo_cdd, novo_cutter)
+                
                 if response.status_code == 200:
-                    st.success("Ficha catalogada com sucesso!")
-                    st.rerun()
+                    st.success("Ficha atualizada com sucesso!")
+                    st.rerun() # Recarrega para remover a ficha da lista
                 else:
-                    st.error("Erro ao atualizar o banco de dados.")
-
+                    st.error("Erro ao salvar no banco de dados.")
+                    
 def formulario_aluno():
     st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
 
