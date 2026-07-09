@@ -164,38 +164,36 @@ def interface_bibliotecaria():
         f_id = ficha.get('id', i)
         titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
-        with st.expander(titulo_expander):
-            # Apenas UMA definição dos campos, sem st.form
+       with st.expander(titulo_expander):
+            # 1. Campos de Edição (Únicos)
             novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{f_id}_{i}")
             novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{f_id}_{i}")
             
-            # Botão de Preview
+            # 2. Botão de Preview
             if st.button("Pré-visualizar Ficha", key=f"prev_{f_id}_{i}"):
                 st.session_state.preview_ficha = ficha
                 st.session_state.preview_cdd = novo_cdd
                 st.session_state.preview_cutter = novo_cutter
                 st.rerun()
 
-            # Área de Visualização
+            # 3. Se houver preview, mostra a ficha E o botão de salvar logo abaixo
             if "preview_ficha" in st.session_state and st.session_state.preview_ficha['id'] == ficha['id']:
+                st.write("---")
                 st.write("### Preview da Ficha")
                 abrir_visualizacao_ficha(
                     st.session_state.preview_ficha, 
                     st.session_state.preview_cdd, 
                     st.session_state.preview_cutter
                 )
-            
-            # Campos editáveis (iniciam com o valor atual do banco)
-            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{ficha['id']}")
-            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{ficha['id']}")
-            
-            # Botão para salvar a alteração
-            if st.button("Salvar e Aprovar Ficha", key=f"btn_{ficha['id']}"):
-                response = atualizar_ficha(ficha['id'], novo_cdd, novo_cutter)
                 
-                if response.status_code == 200:
-                    st.success("Ficha atualizada com sucesso!")
-                    st.rerun() # Recarrega para remover a ficha da lista
+                # O botão de Salvar só aparece depois que o preview for gerado
+                if st.button("Finalizar e Aprovar", key=f"save_{f_id}_{i}"):
+                    response = atualizar_ficha(f_id, st.session_state.preview_cdd, st.session_state.preview_cutter)
+                    if response.status_code == 200:
+                        st.success("Ficha catalogada com sucesso!")
+                        # Removemos o preview do estado para limpar a tela
+                        del st.session_state.preview_ficha
+                        st.rerun()
                 else:
                     st.error("Erro ao salvar no banco de dados.")
                     
