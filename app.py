@@ -44,44 +44,35 @@ def check_password():
     return st.session_state["password_correct"]
 
 def interface_bibliotecaria():
-    st.header("Painel de Processamento Técnico")
+    st.header("📋 Painel de Processamento Técnico")
     fichas = carregar_fichas()
     
-    for ficha in fichas:
-        # ficha[0] é o ID, ficha[2] é o autor, etc.
-        st.write(f"**Autor:** {ficha[2]} | **Título:** {ficha[3]}")
-        with st.popover("Gerar Ficha"):
-            st.write(f"CDD: {ficha[14]}") # Coluna CDD
-            # Adicione aqui os inputs de edição e o botão para salvar/aprovar
-            st.warning("Use UPDATE no Turso para salvar CDD/Cutter")
-    if not st.session_state["fichas_pendentes"]:
-        st.info("Nenhuma ficha pendente.")
+    if not fichas:
+        st.info("Nenhuma ficha pendente no momento.")
         return
 
-    for idx, ficha in enumerate(st.session_state["fichas_pendentes"]):
+    for ficha in fichas:
+        # ficha[0]=id, ficha[2]=autor, ficha[3]=titulo
         with st.container(border=True):
-            col1, col2 = st.columns([3, 1])
-            col1.write(f"**Autor:** {ficha['autor']} | **Título:** {ficha['titulo']}")
-            col1.write(f"**CDD:** {ficha.get('cdd', 'N/A')} | **Cutter:** {ficha.get('cutter', 'N/A')}")
+            st.write(f"**Autor:** {ficha[2]}")
+            st.write(f"**Título:** {ficha[3]}")
             
-            with col2.popover("Gerar/Editar Ficha"):
-                st.write(f"### Editando Ficha {idx+1}")
+            with st.popover("Gerar Ficha / Catalogar"):
+                st.write(f"### Catalogando: {ficha[3]}")
                 
-                # Campos de edição
-                new_autor = st.text_input("Autor", value=ficha['autor'], key=f"e_a_{idx}")
-                new_titulo = st.text_input("Título", value=ficha['titulo'], key=f"e_t_{idx}")
-                new_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"e_cdd_{idx}")
-                new_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"e_cut_{idx}")
+                # Campos para a bibliotecária preencher
+                cdd = st.text_input("CDD", key=f"cdd_{ficha[0]}")
+                cutter = st.text_input("Cutter", key=f"cut_{ficha[0]}")
                 
-                if st.button("Salvar e Aprovar", key=f"btn_save_{idx}"):
-                    st.session_state["fichas_pendentes"][idx].update({
-                        'autor': new_autor,
-                        'titulo': new_titulo,
-                        'cdd': new_cdd,
-                        'cutter': new_cutter
-                    })
-                    st.success("Ficha atualizada!")
-                    st.rerun()
+                if st.button("Finalizar Ficha e Aprovar", key=f"btn_{ficha[0]}"):
+                    # Atualiza o banco no Turso
+                    db = get_db()
+                    db.execute(
+                        "UPDATE fichas SET cdd = ?, cutter = ?, status = 'Aprovado' WHERE id = ?", 
+                        (cdd, cutter, ficha[0])
+                    )
+                    st.success("Ficha catalogada com sucesso!")
+                    st.rerun() # Atualiza a página para remover a ficha da lista
 
 def formulario_aluno():
     st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
