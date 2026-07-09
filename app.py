@@ -189,8 +189,8 @@ def formulario_aluno():
                     st.success("Dados enviados com sucesso!")
                 except Exception as e:
                     st.error(f"Erro ao salvar no banco: {e}")
-if __name__ == "__main__":
-    formulario_aluno()
+
+
 
 
 # --- FLUXO PRINCIPAL ---
