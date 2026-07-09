@@ -141,6 +141,22 @@ def formulario_aluno():
         else:
             st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
 
+    with st.form("form_aluno", clear_on_submit=True):
+        autor = st.text_input("Autor (Sobrenome, Nome)")
+        titulo = st.text_input("Título")
+        
+        # O botão precisa disparar o .append no session_state
+        if st.form_submit_button("Enviar"):
+            nova_ficha = {
+                "autor": autor, 
+                "titulo": titulo, 
+                "cdd": "", 
+                "cutter": ""
+            }
+            # É aqui que o dado é "gravado" na memória do app
+            st.session_state["fichas_pendentes"].append(nova_ficha)
+            st.success("Enviado para análise!")
+
 # --- FLUXO PRINCIPAL ---
 if check_password():
     st.sidebar.success("Acesso Liberado: Bibliotecária")
