@@ -1,31 +1,22 @@
 import streamlit as st
-from libsql_client import create_sync_client
+from libsql_client import client
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
-    return create_sync_client(
+    # Instanciamos o cliente desta forma para versões que não suportam o sync direto
+    return Client(
         url=st.secrets["TURSO_URL"], 
         auth_token=st.secrets["TURSO_TOKEN"]
     )
-    
-    return Client(url=st.secrets["TURSO_URL"], auth_token=st.secrets["TURSO_TOKEN"])
-# --- FUNÇÕES DE DADOS ---
+
 def salvar_no_turso(dados):
     db = get_db()
-    db.execute("""
-        INSERT INTO fichas (
-            instituicao, autor, titulo, subtitulo, tipo_trabalho, 
-            area_concentracao, ano_defesa, num_folhas, orientadores, 
-            coorientadores, keywords, ilustracoes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        dados['instituicao'], dados['autor'], dados['titulo'], dados['subtitulo'],
-        dados['tipo_trabalho'], dados['area_concentracao'], dados['ano_defesa'],
-        dados['num_folhas'], ", ".join(dados['orientadores']), 
-        ", ".join(dados['coorientadores']), ", ".join(dados['keywords']), dados['ilustracoes']
-    ))
+    # Usamos o .execute como comando direto
+    db.execute("INSERT INTO fichas (...) VALUES (...)", (...))
+    # Em muitas versões, o Client precisa ser fechado se não for síncrono
+    db.close()
 
 def carregar_fichas():
     db = get_db()
