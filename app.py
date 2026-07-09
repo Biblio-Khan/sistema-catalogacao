@@ -61,8 +61,32 @@ def salvar_no_turso(dados):
         st.error(f"Erro ao salvar: {response.text}")
 
 def carregar_fichas():
-    db = get_db()
-    return db.execute("SELECT * FROM fichas WHERE status = 'Pendente'").rows
+    # URL configurada para consulta
+    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
+    url = f"{base_url}/v1/execute"
+    
+    headers = {
+        "Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+    
+    # Payload para realizar a consulta (SELECT)
+    payload = {
+        "stmt": {
+            "sql": "SELECT * FROM fichas ORDER BY id DESC"
+        }
+    }
+    
+    with httpx.Client() as client:
+        response = client.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        data = response.json()
+        # O Turso retorna os resultados dentro de 'results' -> 'rows'
+        return data.get("results", {}).get("rows", [])
+    else:
+        st.error(f"Erro ao carregar fichas: {response.text}")
+        return []
 
 # --- FUNÇÕES ---
 
