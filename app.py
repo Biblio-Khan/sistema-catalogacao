@@ -152,40 +152,43 @@ def formulario_aluno():
         num_keywords = st.selectbox("Quantidade de palavras-chave", options=[1, 2, 3, 4])
         keywords = [st.text_input(f"Palavra-chave {i+1}", key=f"kw_{i}") for i in range(num_keywords)]
         
+        # ... (dentro do with st.form("form_dados_gerais"):)
+
         ilustracoes = st.radio("Possui ilustrações?", ("Não", "Sim"))
         
-        submit_button = st.form_submit_button("Enviar dados")
-
-        if st.form_submit_button("Enviar"):
-            # Mock dos dados para salvar
-            dados = {
-                "instituicao": "CDTN",
-                "autor": autor,
-                "titulo": titulo,
-                "subtitulo": "",
-                "tipo_trabalho": "Tese",
-                "area_concentracao": "Radiações",
-                "ano_defesa": "2026",
-                "num_folhas": 100,
-                "orientadores": ["Dr. Fulano"],
-                "coorientadores": [],
-                "keywords": ["Nuclear", "CDTN"],
-                "ilustracoes": "Não"
-            }
-            salvar_no_turso(dados)
-            st.success("Enviado com sucesso!")
-
-    if submit_button:
+        # DEFINA O BOTÃO APENAS UMA VEZ
+        submit_button = st.form_submit_button("Enviar dados para Bibliotecária")
         
-        # A lógica de processamento que você já tinha:
-        if autor and titulo and ano_defesa and num_folhas:
-            if "," not in autor:
+        if submit_button:
+            # Validação básica
+            if not (autor and titulo and ano_defesa and num_folhas):
+                st.error("Por favor, preencha todos os campos obrigatórios (Autor, Título, Ano, Folhas).")
+            elif "," not in autor:
                 st.warning("Atenção: O formato do nome do autor parece estar incorreto (falta a vírgula).")
             else:
-                st.success("Dados registrados com sucesso!")
-        else:
-            st.error("Os campos Autor, Título, Ano e Número de folhas são obrigatórios.")
-
+                # Preparar os dados para o banco
+                dados = {
+                    "instituicao": instituicao,
+                    "autor": autor,
+                    "titulo": titulo,
+                    "subtitulo": subtitulo,
+                    "tipo_trabalho": tipo_trabalho,
+                    "area_concentracao": area_concentracao,
+                    "ano_defesa": ano_defesa,
+                    "num_folhas": num_folhas,
+                    "paginas_bibliografia": pag_bibliografia,
+                    "orientadores": ", ".join(lista_orientadores),
+                    "coorientadores": ", ".join(lista_coorientadores),
+                    "keywords": ", ".join(keywords),
+                    "ilustracoes": ilustracoes
+                }
+                
+                # Salvar no Turso
+                try:
+                    salvar_no_turso(dados)
+                    st.success("Dados enviados com sucesso!")
+                except Exception as e:
+                    st.error(f"Erro ao salvar no banco: {e}")
 if __name__ == "__main__":
     formulario_aluno()
 
