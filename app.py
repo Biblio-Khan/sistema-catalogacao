@@ -1,31 +1,45 @@
 import streamlit as st
 import httpx
 
-# URL da sua logo (via jsDelivr)
-URL_LOGO = "https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true"
+# URL da sua logo
+URL_LOGO = "https://cdn.jsdelivr.net/gh/SEU_USUARIO/SEU_REPOSITORIO@main/logo.png"
 
+st.set_page_config(page_title="Sistema de Catalogação", layout="wide")
 
-# --- CABEÇALHO PRINCIPAL (Topo da página) ---
-# Você pode escolher o layout: Logo + Título Lado a Lado
-col1 = st.columns([1, 5]) 
+# --- TOPO DA PÁGINA (Apenas a Logo) ---
+st.image(URL_LOGO, width=200)
 
-with col1:
-    st.image(URL_LOGO, width=120)
-
-
-st.markdown("""<hr style="height:2px; border:none; color:#003366; background-color:#003366;" />""", unsafe_allow_html=True)
-
-# --- BARRA LATERAL (Sidebar) ---
+# --- BARRA LATERAL (Sidebar com sua assinatura no rodapé) ---
 with st.sidebar:
-    st.image(URL_LOGO, width=150) # Logo repetida na sidebar para identificação rápida
+    # Espaço para seus controles
+    st.write("Controles do Sistema") 
     
-    st.markdown("""<hr style="height:2px; border:none; color:#003366; background-color:#003366;" />""", unsafe_allow_html=True)
-    
-    # ... aqui entram seus filtros, botões de status e navegação ...
-    
-    # Rodapé da Sidebar (Sua Assinatura)
+    # Rodapé da Sidebar (Assinatura fixada embaixo)
     st.markdown("""
-        <div style="margin-top: auto; padding-top: 20px; text-align: center;">
+        <div style="position: absolute; bottom: 20px; width: 85%; text-align: center;">
+            <hr style="border: 1px solid #003366;">
+            <p style="font-size: 0.75rem; color: #003366;">
+                <strong>Sistema de Catalogação v1.0</strong><br>
+                Desenvolvido por: <strong>Seu Nome</strong><br>
+                <em>© 2026 - Gestão de Acervo</em>
+            </p>
+        </div>
+    """, unsafe_allow_html=True)"
+
+st.set_page_config(page_title="Sistema de Catalogação", layout="wide")
+
+# --- TOPO DA PÁGINA (Apenas a Logo) ---
+st.image(URL_LOGO, width=200)
+
+# --- BARRA LATERAL (Sidebar com sua assinatura no rodapé) ---
+with st.sidebar:
+    # Espaço para seus controles
+    st.write("Controles do Sistema") 
+    
+    # Rodapé da Sidebar (Assinatura fixada embaixo)
+    st.markdown("""
+        <div style="position: absolute; bottom: 20px; width: 85%; text-align: center;">
+            <hr style="border: 1px solid #003366;">
             <p style="font-size: 0.75rem; color: #003366;">
                 <strong>Sistema de Catalogação v1.0</strong><br>
                 Desenvolvido por: <strong>Seu Nome</strong><br>
