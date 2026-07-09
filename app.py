@@ -176,7 +176,7 @@ def formulario_aluno():
                     "area_concentracao": area_concentracao,
                     "ano_defesa": ano_defesa,
                     "num_folhas": num_folhas,
-                    "paginas_bibliografia": pag_bibliografia,
+                    "paginas_bibliografia": paginas_bibliografia,
                     "orientadores": ", ".join(lista_orientadores),
                     "coorientadores": ", ".join(lista_coorientadores),
                     "keywords": ", ".join(keywords),
