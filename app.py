@@ -134,6 +134,24 @@ def atualizar_ficha(id_ficha, cdd, cutter):
     with httpx.Client() as client:
         return client.post(url, headers=headers, json=payload)
 
+def abrir_visualizacao_ficha(ficha, cdd, cutter):
+    # Conteúdo HTML da Ficha Catalográfica
+    html_template = f"""
+    <div style="border: 2px solid black; padding: 20px; width: 400px; font-family: serif;">
+        <p style="text-align: center;">{cutter}</p>
+        <p>{ficha.get('autor')}.</p>
+        <p style="padding-left: 20px;">{ficha.get('titulo')}: {ficha.get('subtitulo')} / {ficha.get('autor')}. - {ficha.get('ano_defesa')}.</p>
+        <p style="padding-left: 20px;">{ficha.get('num_folhas')} f.</p>
+        <p style="padding-left: 40px;">{cdd}</p>
+    </div>
+    """
+    
+    # Criamos um arquivo temporário para o Streamlit exibir
+    st.markdown(html_template, unsafe_allow_html=True)
+    
+    # Botão para imprimir/salvar em PDF
+    st.button("Imprimir / Salvar PDF", on_click=lambda: st.write("Use Ctrl+P para imprimir"))
+
 # Atualize a interface:
 def interface_bibliotecaria():
     st.title("Painel da Bibliotecária")
@@ -150,10 +168,21 @@ def interface_bibliotecaria():
         titulo_expander = f"{ficha.get('autor', 'Desconhecido')} - {ficha.get('titulo', 'Sem Título')}"
         
         with st.expander(titulo_expander):
-            # Exibição dos dados atuais (somente leitura)
-            st.write(f"**Instituição:** {ficha.get('instituicao')}")
-            st.write(f"**Ano:** {ficha.get('ano_defesa')}")
-            st.write("---")
+            if st.button("Pré-visualizar Ficha", key=f"prev_{ficha['id']}"):
+                # Armazena os dados atuais na sessão para a visualização
+                st.session_state.preview_ficha = ficha
+                st.session_state.preview_cdd = novo_cdd
+                st.session_state.preview_cutter = novo_cutter
+                st.rerun()
+
+            # Se houver algo para visualizar, exibe
+            if "preview_ficha" in st.session_state:
+                st.write("### Preview da Ficha")
+                abrir_visualizacao_ficha(
+                    st.session_state.preview_ficha, 
+                    st.session_state.preview_cdd, 
+                    st.session_state.preview_cutter
+                )
             
             # Campos editáveis (iniciam com o valor atual do banco)
             novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{ficha['id']}")
