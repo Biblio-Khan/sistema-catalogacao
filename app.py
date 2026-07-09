@@ -2,6 +2,7 @@ import streamlit as st
 import httpx
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
+st.logo("logotipo-CDTN.png")
 
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
