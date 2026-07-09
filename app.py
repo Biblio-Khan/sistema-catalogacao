@@ -1,6 +1,8 @@
 import streamlit as st
 
 st.set_page_config(page_title="Formulário de Catalogação", page_icon="📚")
+if "fichas_pendentes" not in st.session_state:
+    st.session_state["fichas_pendentes"] = []
 
 # --- FUNÇÕES ---
 
@@ -18,8 +20,36 @@ def check_password():
     return st.session_state["password_correct"]
 
 def interface_bibliotecaria():
-    st.header("Painel de Controle da Bibliotecária")
-    st.write("Aqui você processará as fichas pendentes.")
+    st.header("Painel de Processamento Técnico")
+    
+    if not st.session_state["fichas_pendentes"]:
+        st.info("Nenhuma ficha pendente.")
+        return
+
+    for idx, ficha in enumerate(st.session_state["fichas_pendentes"]):
+        with st.container(border=True):
+            col1, col2 = st.columns([3, 1])
+            col1.write(f"**Autor:** {ficha['autor']} | **Título:** {ficha['titulo']}")
+            col1.write(f"**CDD:** {ficha.get('cdd', 'N/A')} | **Cutter:** {ficha.get('cutter', 'N/A')}")
+            
+            with col2.popover("Gerar/Editar Ficha"):
+                st.write(f"### Editando Ficha {idx+1}")
+                
+                # Campos de edição
+                new_autor = st.text_input("Autor", value=ficha['autor'], key=f"e_a_{idx}")
+                new_titulo = st.text_input("Título", value=ficha['titulo'], key=f"e_t_{idx}")
+                new_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"e_cdd_{idx}")
+                new_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"e_cut_{idx}")
+                
+                if st.button("Salvar e Aprovar", key=f"btn_save_{idx}"):
+                    st.session_state["fichas_pendentes"][idx].update({
+                        'autor': new_autor,
+                        'titulo': new_titulo,
+                        'cdd': new_cdd,
+                        'cutter': new_cutter
+                    })
+                    st.success("Ficha atualizada!")
+                    st.rerun()
 
 def formulario_aluno():
     st.title("Formulário de Catalogação: Centro de Desenvolvimento de Tecnologia Nuclear")
