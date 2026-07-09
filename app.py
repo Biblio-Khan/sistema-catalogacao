@@ -1,16 +1,28 @@
 import streamlit as st
 import httpx
 
-# URL do jsDelivr para a logo
-URL_LOGO = "https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true"
-
-# Criar duas colunas: uma para a logo, outra para o título
-col1, col2 = st.columns([1, 4]) # Proporção 1:4 (Logo menor que o título)
-
-with col1:
-    st.image(URL_LOGO, width=120)
-
-st.divider()
+with st.sidebar:
+    # 1. Logo institucional
+    st.image("https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true", width=150)
+    
+    # Linha divisória personalizada com a cor da biblioteca
+    st.markdown("""
+        <hr style="height:2px; border:none; color:#003366; background-color:#003366;" />
+    """, unsafe_allow_html=True)
+    
+    # 2. Espaço para o menu ou outras funcionalidades que você já tem
+    # st.write("Menu Principal...") 
+    
+    # 3. Rodapé fixo com sua assinatura
+    st.markdown("""
+        <div style="margin-top: auto; padding-top: 20px; text-align: center;">
+            <p style="font-size: 0.75rem; color: #003366; line-height: 1.2;">
+                <strong>Sistema de Catalogação v1.0</strong><br>
+                Desenvolvido por: <strong>Sabrina Lobeu</strong><br>
+                <em>© 2026 - BiblioKhan</em>
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 # --- CONFIGURAÇÃO DO BANCO ---
 def get_db():
     # Esta versão é síncrona e funciona perfeitamente no fluxo do Streamlit
