@@ -135,22 +135,22 @@ def atualizar_ficha(id_ficha, cdd, cutter):
         return client.post(url, headers=headers, json=payload)
 
 def abrir_visualizacao_ficha(ficha, cdd, cutter):
-    # Conteúdo HTML da Ficha Catalográfica
+    # Tratamento dos campos: Se for None, substitui por string vazia
+    autor = ficha.get('autor') or ""
+    titulo = ficha.get('titulo') or "Título não informado"
+    subtitulo = ficha.get('subtitulo') or ""
+    folhas = ficha.get('num_folhas') or "0"
+    
     html_template = f"""
     <div style="border: 2px solid black; padding: 20px; width: 400px; font-family: serif;">
-        <p style="text-align: center;">{cutter}</p>
-        <p>{ficha.get('autor')}.</p>
-        <p style="padding-left: 20px;">{ficha.get('titulo')}: {ficha.get('subtitulo')} / {ficha.get('autor')}. - {ficha.get('ano_defesa')}.</p>
-        <p style="padding-left: 20px;">{ficha.get('num_folhas')} f.</p>
-        <p style="padding-left: 40px;">{cdd}</p>
+        <p style="text-align: center;">{cutter or '---'}</p>
+        <p>{autor}.</p>
+        <p style="padding-left: 20px;">{titulo}: {subtitulo} / {autor}. - {ficha.get('ano_defesa', '')}.</p>
+        <p style="padding-left: 20px;">{folhas} f.</p>
+        <p style="padding-left: 40px;">{cdd or '---'}</p>
     </div>
     """
-    
-    # Criamos um arquivo temporário para o Streamlit exibir
     st.markdown(html_template, unsafe_allow_html=True)
-    
-    # Botão para imprimir/salvar em PDF
-    st.button("Imprimir / Salvar PDF", on_click=lambda: st.write("Use Ctrl+P para imprimir"))
 
 # Atualize a interface:
 def interface_bibliotecaria():
