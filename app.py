@@ -24,8 +24,9 @@ def salvar_no_turso(dados):
     
     # O Turso espera os argumentos neste formato: [{"type": "text", "value": "exemplo"}]
     # ou simplesmente uma lista de valores. Vamos tentar o formato esperado pela API REST:
+    # Ajuste: A API espera 'stmt' (o SQL) e 'args' (os valores)
     payload = {
-        "statement": {
+        "stmt": {
             "sql": """
             INSERT INTO fichas (
                 instituicao, autor, titulo, subtitulo, tipo_trabalho, 
@@ -40,7 +41,7 @@ def salvar_no_turso(dados):
                 {"type": "text", "value": dados['subtitulo']},
                 {"type": "text", "value": dados['tipo_trabalho']},
                 {"type": "text", "value": dados['area_concentracao']},
-                {"type": "text", "value": str(dados['ano_defesa'])}, # Garante que seja string
+                {"type": "text", "value": str(dados['ano_defesa'])},
                 {"type": "text", "value": str(dados['num_folhas'])},
                 {"type": "text", "value": dados['paginas_bibliografia']},
                 {"type": "text", "value": dados['orientadores']},
