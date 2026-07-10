@@ -184,8 +184,8 @@ selecao_nome = st.sidebar.selectbox("Selecione a obra:", list(mapeamento.keys())
 id_selecionado = mapeamento[selecao_nome]
 
 # Carrega a ficha no estado
-if 'id_atual' not in st.session_state or st.session_state.id_atual != id_selecionado:
-resultado_detalhe = db.execute("SELECT * FROM fichas WHERE id = ?", (id_selecionado,))
+    if 'id_atual' not in st.session_state or st.session_state.id_atual != id_selecionado:
+    resultado_detalhe = db.execute("SELECT * FROM fichas WHERE id = ?", (id_selecionado,))
 # O primeiro item da lista de linhas é a sua ficha
 dados_banco = resultado_detalhe.rows[0]
     st.session_state.ficha = dict(dados_banco)
