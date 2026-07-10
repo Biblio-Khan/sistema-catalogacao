@@ -173,42 +173,50 @@ def atualizar_ficha_no_turso(dados):
 # --- FUNÇÃO CENTRAL DE API (Com tratamento de erro) ---
 def executar_query(sql, args=None):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
-    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
     payload = {"stmt": {"sql": sql, "args": args or []}}
+    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
     
-    with httpx.Client() as client:
-        response = client.post(f"{base_url}/v1/execute", headers=headers, json=payload)
-    
-    # Se a resposta não for 200, retorna um erro amigável
-    if response.status_code != 200:
-        st.error(f"Erro na API Turso: {response.text}")
-        return None
-    return response.json()
+    resp = httpx.post(f"{base_url}/v1/execute", headers=headers, json=payload)
+    return resp.json()
 
-# --- CARREGAR DADOS DA FICHA (Com verificação de tipo) ---
-if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
-    args_busca = [{"type": "integer", "value": id_sel}]
-    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", args_busca)
+st.title("📚 Sistema de Catalogação")
+
+# --- 1. BUSCA SIMPLES ---
+dados = executar_query("SELECT id, titulo, autor FROM fichas")
+# Extrai direto da resposta do Turso
+linhas = dados.get('result', {}).get('rows', [])
+lista_fichas = {f"{r[1]['value']} - {r[2]['value']}": r[0]['value'] for r in linhas}
+
+if not lista_fichas:
+    st.error("Nenhuma ficha encontrada.")
+    st.stop()
+
+# --- 2. SELEÇÃO ---
+selecao = st.sidebar.selectbox("Escolha a obra:", list(lista_fichas.keys()))
+id_selecionado = lista_fichas[selecao]
+
+# --- 3. EXIBIÇÃO E EDIÇÃO ---
+dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [{"value": id_selecionado}])
+row = dados_ficha.get('result', {}).get('rows', [[]])[0]
+
+# Mapeamento simples (ajuste a ordem se precisar)
+colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
+ficha = {colunas[i]: (row[i].get('value') if i < len(row) else "") for i in range(len(colunas))}
+
+st.write("### Editando:", ficha['titulo'])
+
+with st.form("form_edicao"):
+    for campo in ["instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords"]:
+        ficha[campo] = st.text_input(campo.capitalize(), ficha.get(campo, ""))
     
-    # Verifica se dados_ficha não é None e se é um dicionário
-    if isinstance(dados_ficha, dict) and 'result' in dados_ficha:
-        rows = dados_ficha['result'].get('rows', [])
-        if rows:
-            colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
-            
-            raw_row = rows[0]
-            # Extração segura tratando itens que podem ser None ou não ter 'value'
-            valores = []
-            for item in raw_row:
-                if isinstance(item, dict):
-                    valores.append(item.get('value', ""))
-                else:
-                    valores.append("")
-            
-            st.session_state.ficha = dict(zip(colunas, valores))
-            st.session_state.id_atual = id_sel
-    else:
-        st.warning("O banco não retornou dados válidos para esta ficha.")
+    if st.form_submit_button("Salvar"):
+        sql = "UPDATE fichas SET instituicao=?, autor=?, titulo=?, subtitulo=?, tipo_trabalho=?, area_concentracao=?, ano_defesa=?, num_folhas=?, orientadores=?, coorientadores=?, keywords=? WHERE id=?"
+        args = [{"value": ficha[c]} for c in ["instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords"]]
+        args.append({"value": id_selecionado})
+        
+        executar_query(sql, args)
+        st.success("Salvo!")
+        st.rerun()
 
 # --- CARREGAR DADOS DA FICHA ---
 # ... dentro do bloco de carregamento da ficha:
