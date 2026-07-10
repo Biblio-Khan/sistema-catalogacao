@@ -189,26 +189,30 @@ def executar_query(sql, args=None):
 # --- PAINEL ---
 st.title("📚 Sistema de Catalogação")
 
-# 1. Carregar lista de fichas (Certifique-se de que a tabela se chama 'fichas')
-# Se der erro aqui, verifique se a tabela no banco é mesmo 'fichas'
+# --- BUSCA DE LISTA E DEFINIÇÃO DE ID_SEL ---
+# Garantimos que essas variáveis existam antes de qualquer uso
+fichas_lista = []
+mapeamento = {}
+id_sel = None
+
+# Busca dos dados
 dados_lista = executar_query("SELECT id, titulo, autor FROM fichas")
 
-# Verificação de segurança: checa se a chave 'results' existe na resposta
 if 'results' in dados_lista and len(dados_lista['results']) > 0:
+    # Ajuste o caminho dos dados conforme a resposta da sua API
     fichas_lista = dados_lista['results'][0]['response']['rows']
     mapeamento = {f"{f[1]} - {f[2]}": f[0] for f in fichas_lista}
 
+# Seleção na lateral
+if mapeamento:
     selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
     id_sel = mapeamento[selecao]
+else:
+    st.sidebar.warning("Nenhuma ficha encontrada no banco.")
+    st.stop() # Para o app aqui se não houver fichas
 
-# 2. Carregar ficha completa
-if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
-    # 1. Debug: Verifique se id_sel tem valor
-    st.sidebar.write(f"ID selecionado: {id_sel}") 
-
-    # 2. Formato obrigatório da API REST do Turso para parâmetros:
-    # A API não aceita apenas [id_sel], ela exige o formato de objeto com 'value'
-    args_formatados = [{"value": id_sel}]
+# Agora, com certeza id_sel existe
+st.sidebar.write(f"ID selecionado: {id_sel}")
     
     dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", args_formatados)
     colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
