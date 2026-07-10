@@ -194,8 +194,6 @@ def exibir_preview_ficha(ficha):
 
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
-    st.write("### ✏️ Edição de Ficha")
-    
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
     with st.expander("📌 Adicionar/Editar CDD e Cutter", expanded=True):
         with st.form(f"form_cdd_cutter_{ficha.get('id')}"):
