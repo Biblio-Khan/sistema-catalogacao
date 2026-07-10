@@ -152,57 +152,81 @@ def atualizar_ficha(id_ficha, cdd, cutter):
     with httpx.Client() as client:
         return client.post(url, headers=headers, json=payload)
 
-def abrir_visualizacao_ficha(ficha, cdd, cutter):
-    # Campos básicos
+import streamlit as st
+
+# --- SIMULAÇÃO DE INICIALIZAÇÃO ---
+# No seu sistema real, os dados viriam do banco (ex: db.execute("SELECT..."))
+if 'ficha' not in st.session_state:
+    st.session_state.ficha = {
+        "autor": "Lobeu, Sabrina.",
+        "titulo": "Termo-energia nuclear",
+        "subtitulo": "Estudo de caso",
+        "ano": "2026",
+        "num_folhas": "200",
+        "orientador": "Dr. Silva, João",
+        "palavras_chave": "Energia nuclear, Termodinâmica"
+    }
+
+# --- FUNÇÃO DE VISUALIZAÇÃO (PREVIEW) ---
+def abrir_visualizacao_ficha(ficha, cdd='---', cutter='---'):
+    # Processamento de dados
     autor = ficha.get('autor') or ""
     titulo = ficha.get('titulo') or "Título não informado"
     subtitulo = ficha.get('subtitulo')
     subtitulo_formatado = f": {subtitulo}" if subtitulo else ""
     folhas = ficha.get('num_folhas') or "0"
-    ano = ficha.get('ano_defesa') or ""
-    
-    # Novos campos colhidos do banco
+    ano = ficha.get('ano_defesa') or ficha.get('ano') or ""
     orientador = ficha.get('orientador') or ""
-    palavras_chave = ficha.get('palavras_chave', []) # Espera uma lista: ['Termo1', 'Termo2']
-    
-    # Formatação das palavras-chave (numeradas, conforme padrão)
-    lista_chaves = "".join([f"{i+1}. {item}. " for i, item in enumerate(palavras_chave)])
-    
+    palavras = [p.strip() for p in ficha.get('palavras_chave', "").split(",") if p.strip()]
+    lista_html = "".join([f"<li>{i+1}. {item}</li>" for i, item in enumerate(palavras)])
+
+    # Renderização HTML
     html_template = f"""
     <div style="
-        border: 1px solid #000; 
-        padding: 25px; 
-        width: 450px; 
-        font-family: 'Times New Roman', serif; 
-        font-size: 12pt;
-        line-height: 1.4;
+        border: 1px solid #000; padding: 25px; width: 450px; 
+        font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.4;
     ">
-        <p style="text-align: center; margin: 0 0 20px 0;">{cutter or '---'}</p>
-        
+        <p style="text-align: center; margin: 0 0 20px 0;">{cutter}</p>
         <p style="margin: 0;">{autor}.</p>
-        
-        <p style="margin: 0; padding-left: 20px;">
-            {titulo}{subtitulo_formatado} / {autor}. – {ano}.
-        </p>
-        
-        <p style="margin: 0; padding-left: 20px;">
-            {folhas} f.</p>
-        
-        <p style="margin: 0; padding-left: 20px;">
-            Orientador: {orientador}.
-        </p>
-        
-        <p style="margin: 0; padding-top: 10px; padding-left: 20px;">
-            {lista_chaves}
-        </p>
-        
-        <p style="margin: 0; padding-top: 10px; padding-left: 40px;">
-            {cdd or '---'}
-        </p>
+        <p style="margin: 0; padding-left: 20px;">{titulo}{subtitulo_formatado} / {autor}. – {ano}.</p>
+        <p style="margin: 0; padding-left: 20px;">{folhas} f.</p>
+        <p style="margin: 0; padding-left: 20px;">Orientador: {orientador}.</p>
+        <p style="margin: 0; padding-top: 10px; padding-left: 20px;">Palavras-chave: <ol>{lista_html}</ol></p>
+        <p style="margin: 0; padding-top: 10px; padding-left: 40px;">{cdd}</p>
     </div>
     """
-    st.write("Conteúdo da ficha para debug:", ficha)
     st.markdown(html_template, unsafe_allow_html=True)
+
+# --- INTERFACE PRINCIPAL ---
+st.title("Sistema de Catalogação")
+
+# 1. Preview Inicial
+abrir_visualizacao_ficha(st.session_state.ficha)
+
+# 2. Edição Seletiva
+if st.button("✏️ Editar campos da ficha"):
+    st.session_state.modo_edicao = True
+
+if st.session_state.get('modo_edicao', False):
+    campos = st.multiselect("Selecione o que deseja alterar:", 
+                            ["Autor", "Título", "Orientador", "Nº de Folhas", "Palavras-chave"])
+    
+    with st.form("form_edicao"):
+        if "Autor" in campos:
+            st.session_state.ficha['autor'] = st.text_input("Autor", st.session_state.ficha['autor'])
+        if "Título" in campos:
+            st.session_state.ficha['titulo'] = st.text_input("Título", st.session_state.ficha['titulo'])
+        if "Orientador" in campos:
+            st.session_state.ficha['orientador'] = st.text_input("Orientador", st.session_state.ficha['orientador'])
+        if "Nº de Folhas" in campos:
+            st.session_state.ficha['num_folhas'] = st.text_input("Nº de Folhas", st.session_state.ficha['num_folhas'])
+        if "Palavras-chave" in campos:
+            st.session_state.ficha['palavras_chave'] = st.text_area("Palavras-chave", st.session_state.ficha['palavras_chave'])
+        
+        if st.form_submit_button("Salvar no Banco"):
+            st.success("Dados enviados para o banco de dados!")
+            st.session_state.modo_edicao = False
+            st.rerun()
 
 
 # Atualize a interface:
