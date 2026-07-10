@@ -194,37 +194,38 @@ def exibir_preview_ficha(ficha):
 
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
-    st.write("### ✏️ Edição Dinâmica")
+    st.write("### ✏️ Edição de Ficha")
     
-    campos_editaveis = ["titulo", "autor", "cdd", "cutter", "ano_defesa"]
-    
-    campo_escolhido = st.selectbox("Selecione o campo:", campos_editaveis, key=f"sel_{ficha.get('id')}")
-    
-    with st.form(f"form_edicao_{ficha.get('id')}"):
-        valor_atual = ficha.get(campo_escolhido, "")
-        novo_valor = st.text_input(f"Editar {campo_escolhido}:", value=valor_atual)
-        
-        btn_salvar = st.form_submit_button("Salvar")
-        
-        if btn_salvar:
-            # 1. Verifica se temos o ID
-            id_alvo = ficha.get('id')
-            if not id_alvo:
-                st.error("Erro: ID da ficha não encontrado.")
-                return
-
-            # 2. Executa a query
-            sql = f"UPDATE fichas SET {campo_escolhido}=? WHERE id=?"
-            resultado = executar_query(sql, [{"value": novo_valor}, {"value": id_alvo}])
-            
-            # 3. Exibe o que aconteceu (Debug)
-            st.write("Resultado do Banco:", resultado)
-            
-            if "result" in resultado:
-                st.success("Sucesso! Recarregando...")
+    # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
+    with st.expander("📌 Adicionar/Editar CDD e Cutter", expanded=True):
+        with st.form(f"form_cdd_cutter_{ficha.get('id')}"):
+            cdd = st.text_input("CDD", value=ficha.get('cdd') or "")
+            cutter = st.text_input("Cutter", value=ficha.get('cutter') or "")
+            if st.form_submit_button("Salvar Catalogação"):
+                # Atualiza os dois campos de uma vez
+                sql = "UPDATE fichas SET cdd=?, cutter=? WHERE id=?"
+                executar_query(sql, [{"value": cdd}, {"value": cutter}, {"value": ficha.get('id')}])
+                st.success("Dados de catalogação atualizados!")
                 st.rerun()
-            else:
-                st.error(f"Erro ao salvar: {resultado}")
+
+    # 2. Seção de Edição de outros campos (Lista dinâmica)
+    st.write("---")
+    campos_editaveis = [
+        "titulo", "subtitulo", "autor", "instituicao", "tipo_trabalho", 
+        "ano_defesa", "num_folhas", "paginas_bibliografia", "orientadores", "keywords"
+    ]
+    
+    campo_escolhido = st.selectbox("Ou selecionar outro campo para corrigir:", campos_editaveis)
+    
+    with st.form(f"form_edicao_{ficha.get('id')}_{campo_escolhido}"):
+        valor_atual = ficha.get(campo_escolhido, "")
+        novo_valor = st.text_input(f"Editar {campo_escolhido.replace('_', ' ').capitalize()}:", value=valor_atual)
+        
+        if st.form_submit_button("Salvar alteração"):
+            sql = f"UPDATE fichas SET {campo_escolhido}=? WHERE id=?"
+            executar_query(sql, [{"value": novo_valor}, {"value": ficha.get('id')}])
+            st.success(f"Campo '{campo_escolhido}' atualizado!")
+            st.rerun()
 
 # --- 4. PAINEL BIBLIOTECÁRIA (Onde tudo se junta) ---
 def interface_bibliotecaria():
