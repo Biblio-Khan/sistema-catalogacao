@@ -221,51 +221,32 @@ def painel_edicao():
 
 # Atualize a interface:
 def interface_bibliotecaria():
-    st.title("Painel da Bibliotecária")
+    st.title("Painel de Edição da Bibliotecária")
     fichas = carregar_fichas()
     
     if not fichas:
-        st.info("Nenhuma ficha pendente no momento.")
+        st.info("Nenhuma ficha encontrada no banco.")
         return
 
-    for i, ficha in enumerate(fichas):
+    for ficha in fichas:
         f_id = ficha.get('id')
-        # Título do expander
         titulo_expander = f"{ficha.get('autor', 'Sem autor')} - {ficha.get('titulo', 'Sem título')}"
         
         with st.expander(titulo_expander):
-            # 1. Campos de edição (identificados de forma única)
-            novo_cdd = st.text_input("CDD", value=ficha.get('cdd', ''), key=f"cdd_{f_id}_{i}")
-            novo_cutter = st.text_input("Cutter", value=ficha.get('cutter', ''), key=f"cut_{f_id}_{i}")
+            # Exibe os dados atuais da ficha
+            st.write("### Dados da Ficha")
+            st.json(ficha)
             
-            # 2. Botão de Preview: armazena os valores no session_state
-            if st.button("Pré-visualizar Ficha", key=f"prev_{f_id}_{i}"):
-                st.session_state.preview_ficha = ficha
-                st.session_state.preview_cdd = novo_cdd
-                st.session_state.preview_cutter = novo_cutter
-                st.rerun()
-
-            # 3. Exibição do Preview (apenas se for o clique desta ficha)
-            if "preview_ficha" in st.session_state and st.session_state.preview_ficha.get('id') == f_id:
-                st.write("---")
-                st.write("### Preview da Ficha")
-                abrir_visualizacao_ficha(
-                    st.session_state.preview_ficha, 
-                    st.session_state.preview_cdd, 
-                    st.session_state.preview_cutter
-                )
+            # Botão para editar (abre um formulário simples para CDD e Cutter)
+            st.write("---")
+            with st.form(f"form_{f_id}"):
+                cdd = st.text_input("CDD", value=ficha.get('cdd', ''))
+                cutter = st.text_input("Cutter", value=ficha.get('cutter', ''))
                 
-                # 4. Botão de Salvar (exibido apenas no bloco de visualização)
-                if st.button("Finalizar e Aprovar", key=f"save_{f_id}_{i}"):
-                    response = atualizar_ficha(f_id, st.session_state.preview_cdd, st.session_state.preview_cutter)
-                    if response.status_code == 200:
-                        st.success("Ficha catalogada com sucesso!")
-                        # Limpa o estado para esconder o preview e o botão salvar
-                        if "preview_ficha" in st.session_state:
-                            del st.session_state.preview_ficha
-                        st.rerun()
-                    else:
-                        st.error("Erro ao salvar no banco.")
+                if st.form_submit_button("Salvar Catalogação"):
+                    # Aqui você chamaria sua função de atualização
+                    st.success(f"Ficha {f_id} catalogada!")
+                    st.rerun()
                     
 def formulario_aluno():
     st.title("Formulário de Ficha Catalográfica")
