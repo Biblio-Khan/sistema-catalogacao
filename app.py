@@ -182,13 +182,35 @@ def exibir_preview_ficha(ficha):
 
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
-    st.write("### ✏️ Edição Técnica")
-    with st.form(f"form_{ficha.get('id')}"):
-        cdd = st.text_input("CDD", value=ficha.get('cdd', ''))
-        cutter = st.text_input("Cutter", value=ficha.get('cutter', ''))
-        if st.form_submit_button("Salvar Catalogação"):
-            atualizar_ficha(ficha.get('id'), cdd, cutter)
-            st.success("Salvo!")
+    st.write("### ✏️ Edição Dinâmica de Ficha")
+    
+    # Lista de campos permitidos para edição. 
+    # Certifique-se que estes nomes batem exatamente com as colunas do seu banco de dados.
+    campos_editaveis = [
+        "titulo", "subtitulo", "autor", "instituicao", "tipo_trabalho", 
+        "area_concentracao", "ano_defesa", "num_folhas", "paginas_bibliografia", 
+        "orientadores", "coorientadores", "keywords", "ilustracoes", "cdd", "cutter"
+    ]
+    
+    # 1. Seleção do campo que a bibliotecária deseja corrigir
+    campo_escolhido = st.selectbox("Selecione o campo que deseja alterar:", campos_editaveis)
+    
+    # 2. Formulário para o campo selecionado
+    with st.form(f"form_edicao_{ficha.get('id')}_{campo_escolhido}"):
+        # Pega o valor atual para já aparecer preenchido no input
+        valor_atual = ficha.get(campo_escolhido, "")
+        
+        # Cria o campo de entrada para a edição
+        novo_valor = st.text_input(f"Editar {campo_escolhido.replace('_', ' ').capitalize()}:", value=valor_atual)
+        
+        # Botão de salvar
+        if st.form_submit_button("Salvar alteração no banco"):
+            # Update dinâmico: o campo escolhido será atualizado na linha específica do ID
+            sql = f"UPDATE fichas SET {campo_escolhido}=? WHERE id=?"
+            executar_query(sql, [{"value": novo_valor}, {"value": ficha.get('id')}])
+            
+            st.success(f"Campo '{campo_escolhido}' atualizado com sucesso!")
+            # Recarrega a página para refletir a mudança no preview imediatamente
             st.rerun()
 
 # --- 4. PAINEL BIBLIOTECÁRIA (Onde tudo se junta) ---
