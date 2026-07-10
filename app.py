@@ -69,45 +69,6 @@ def atualizar_ficha_no_turso(dados):
         st.success("Ficha atualizada com sucesso!")
     else:
         st.error(f"Erro ao atualizar: {response.text}")
-def carregar_fichas():
-    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
-    url = f"{base_url}/v1/execute"
-    
-    headers = {
-        "Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}",
-        "Content-Type": "application/json"
-    }
-    
-    # Agora pedimos todos os dados
-    payload = {"stmt": {"sql": "SELECT * FROM fichas"}}
-    
-    with httpx.Client() as client:
-        response = client.post(url, headers=headers, json=payload)
-    
-    if response.status_code == 200:
-        data = response.json()
-        
-        # Acesso direto ao formato que você enviou:
-        # O Turso entrega em 'result' (singular) e dentro dele 'rows'
-        rows = data.get("result", {}).get("rows", [])
-        
-        # Se você quiser transformar isso em algo mais fácil de usar (dicionários):
-        # As colunas estão em data["result"]["cols"]
-        cols = [c["name"] for c in data.get("result", {}).get("cols", [])]
-        
-        # Converte cada linha (que é uma lista de objetos) para um dicionário
-       # Converte cada linha para um dicionário de forma segura
-        fichas_formatadas = []
-        for row in rows:
-            # Usamos .get("value") para evitar erro caso o campo seja NULL
-            linha_dict = {}
-            for i, item in enumerate(row):
-                col_name = cols[i]
-                # Se 'value' não existir (for NULL), salva como None
-                linha_dict[col_name] = item.get("value") if item is not None else None
-            fichas_formatadas.append(linha_dict)
-            
-        return fichas_formatadas
 # --- FUNÇÕES ---
 
 def check_password():
@@ -170,78 +131,59 @@ def atualizar_ficha_no_turso(dados):
         st.error(f"Erro ao atualizar: {response.text}")
 
 # --- FUNÇÃO CENTRAL DE API (Com tratamento de erro) ---
-def painel_edicao():
-    st.subheader("Painel de Catalogação")
+# --- 1. CONFIGURAÇÃO E BUSCA ---
+def executar_query(sql, args=None):
+    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
+    payload = {"stmt": {"sql": sql, "args": args or []}}
+    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
+    resp = httpx.post(f"{base_url}/v1/execute", headers=headers, json=payload)
+    return resp.json()
+
+def carregar_fichas():
+    # Retorna uma lista de dicionários pronta para uso
+    data = executar_query("SELECT * FROM fichas")
+    rows = data.get("result", {}).get("rows", [])
+    cols = [c["name"] for c in data.get("result", {}).get("cols", [])]
     
-    # Busca da ficha (mesma lógica anterior)
-    fichas = carregar_fichas()
-    if not fichas: return
-    
-    # 1. Seleção da ficha
-    ficha_selecionada = st.sidebar.selectbox("Ficha:", [f"{f['autor']} - {f['titulo']}" for f in fichas])
-    ficha = next(f for f in fichas if f"{f['autor']} - {f['titulo']}" == ficha_selecionada)
+    fichas = []
+    for row in rows:
+        fichas.append({cols[i]: (row[i].get("value") if row[i] else "") for i in range(len(row))})
+    return fichas
 
-    # 2. Layout: Preview à esquerda, Edição à direita
-    col_preview, col_edicao = st.columns([1, 1])
+# --- 2. ATUALIZAÇÃO ---
+def atualizar_ficha(id_ficha, cdd, cutter):
+    sql = "UPDATE fichas SET cdd=?, cutter=? WHERE id=?"
+    return executar_query(sql, [{"value": cdd}, {"value": cutter}, {"value": id_ficha}])
 
-    with col_edicao:
-        st.write("### Selecione o campo para editar")
-        campo_escolhido = st.selectbox("Campo:", list(ficha.keys()))
-        
-        # Formulário que atualiza direto no banco
-        with st.form("form_update"):
-            novo_valor = st.text_input(f"Editar {campo_escolhido}", value=ficha.get(campo_escolhido, ""))
-            if st.form_submit_button("Atualizar no Banco"):
-                # Query de update dinâmico
-                sql = f"UPDATE fichas SET {campo_escolhido}=? WHERE id=?"
-                executar_query(sql, [{"value": novo_valor}, {"value": ficha['id']}])
-                st.success("Atualizado!")
-                st.rerun()
+# --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
+def painel_edicao(ficha):
+    st.write("### ✏️ Edição Técnica")
+    with st.form(f"form_{ficha.get('id')}"):
+        cdd = st.text_input("CDD", value=ficha.get('cdd', ''))
+        cutter = st.text_input("Cutter", value=ficha.get('cutter', ''))
+        if st.form_submit_button("Salvar Catalogação"):
+            atualizar_ficha(ficha.get('id'), cdd, cutter)
+            st.success("Salvo!")
+            st.rerun()
 
-    with col_preview:
-        st.write("### Preview da Ficha")
-        # --- AQUI VAI O SEU DESIGN DA FICHA ---
-        # Exemplo simples, você pode formatar com HTML/Markdown para parecer uma ficha real
-        st.markdown(f"""
-        <div style="border: 1px solid #000; padding: 20px; font-family: serif;">
-            <p align="center"><b>{ficha.get('autor', 'AUTOR')}</b></p>
-            <p>{ficha.get('titulo', 'TÍTULO')}. 
-            {ficha.get('ano_defesa', 'ANO')}. {ficha.get('num_folhas', '0')} f.</p>
-            <p>Orientador: {ficha.get('orientadores', '')}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-# --- COMO CHAMAR NO SEU FLUXO PRINCIPAL ---
-# Basta chamar painel_edicao() apenas quando a bibliotecária estiver logada
-
-# Atualize a interface:
+# --- 4. PAINEL BIBLIOTECÁRIA (Onde tudo se junta) ---
 def interface_bibliotecaria():
-    st.title("Painel de Edição da Bibliotecária")
+    st.title("Painel da Bibliotecária")
     fichas = carregar_fichas()
     
     if not fichas:
-        st.info("Nenhuma ficha encontrada no banco.")
+        st.info("Nenhuma ficha pendente.")
         return
 
     for ficha in fichas:
-        f_id = ficha.get('id')
-        titulo_expander = f"{ficha.get('autor', 'Sem autor')} - {ficha.get('titulo', 'Sem título')}"
-        
-        with st.expander(titulo_expander):
-            # Exibe os dados atuais da ficha
-            st.write("### Dados da Ficha")
-            st.json(ficha)
-            
-            # Botão para editar (abre um formulário simples para CDD e Cutter)
-            st.write("---")
-            with st.form(f"form_{f_id}"):
-                cdd = st.text_input("CDD", value=ficha.get('cdd', ''))
-                cutter = st.text_input("Cutter", value=ficha.get('cutter', ''))
-                
-                if st.form_submit_button("Salvar Catalogação"):
-                    # Aqui você chamaria sua função de atualização
-                    st.success(f"Ficha {f_id} catalogada!")
-                    st.rerun()
+        with st.expander(f"{ficha.get('autor')} - {ficha.get('titulo')}"):
+            col1, col2 = st.columns(2)
+            with col1:
+                # Aqui exibimos o preview
+                exibir_preview_ficha(ficha)
+            with col2:
+                # Aqui exibimos a edição
+                painel_edicao(ficha)
                     
 def formulario_aluno():
     st.title("Formulário de Ficha Catalográfica")
