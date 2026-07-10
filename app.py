@@ -170,33 +170,45 @@ def atualizar_ficha_no_turso(dados):
     else:
         st.error(f"Erro ao atualizar: {response.text}")
 
-
+# --- FUNÇÃO CENTRAL DE API (Com tratamento de erro) ---
 def executar_query(sql, args=None):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
     headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
     payload = {"stmt": {"sql": sql, "args": args or []}}
+    
     with httpx.Client() as client:
         response = client.post(f"{base_url}/v1/execute", headers=headers, json=payload)
+    
+    # Se a resposta não for 200, retorna um erro amigável
+    if response.status_code != 200:
+        st.error(f"Erro na API Turso: {response.text}")
+        return None
     return response.json()
 
-# --- BUSCA DA LISTA ---
-dados_lista = executar_query("SELECT id, titulo, autor FROM fichas")
-mapeamento = {}
-
-if 'result' in dados_lista:
-    # Navegando na estrutura correta que você enviou:
-    for row in dados_lista['result']['rows']:
-        id_val = row[0]['value']
-        titulo = row[1]['value']
-        autor = row[2]['value']
-        mapeamento[f"{titulo} - {autor}"] = id_val
-
-if not mapeamento:
-    st.error("Nenhuma ficha encontrada.")
-    st.stop()
-
-selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
-id_sel = mapeamento[selecao]
+# --- CARREGAR DADOS DA FICHA (Com verificação de tipo) ---
+if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
+    args_busca = [{"type": "integer", "value": id_sel}]
+    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", args_busca)
+    
+    # Verifica se dados_ficha não é None e se é um dicionário
+    if isinstance(dados_ficha, dict) and 'result' in dados_ficha:
+        rows = dados_ficha['result'].get('rows', [])
+        if rows:
+            colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
+            
+            raw_row = rows[0]
+            # Extração segura tratando itens que podem ser None ou não ter 'value'
+            valores = []
+            for item in raw_row:
+                if isinstance(item, dict):
+                    valores.append(item.get('value', ""))
+                else:
+                    valores.append("")
+            
+            st.session_state.ficha = dict(zip(colunas, valores))
+            st.session_state.id_atual = id_sel
+    else:
+        st.warning("O banco não retornou dados válidos para esta ficha.")
 
 # --- CARREGAR DADOS DA FICHA ---
 # ... dentro do bloco de carregamento da ficha:
