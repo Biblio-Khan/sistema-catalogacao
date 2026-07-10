@@ -134,8 +134,20 @@ def atualizar_ficha_no_turso(dados):
 # --- 1. CONFIGURAÇÃO E BUSCA ---
 def executar_query(sql, args=None):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
-    payload = {"stmt": {"sql": sql, "args": args or []}}
+    
+    # O Turso exige que os argumentos tenham o formato {"type": "text", "value": "..."}
+    # Vamos transformar seus argumentos caso eles venham como simples {"value": ...}
+    formatted_args = []
+    if args:
+        for arg in args:
+            if isinstance(arg, dict) and "type" not in arg:
+                formatted_args.append({"type": "text", "value": str(arg["value"])})
+            else:
+                formatted_args.append(arg)
+
+    payload = {"stmt": {"sql": sql, "args": formatted_args}}
     headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
+    
     resp = httpx.post(f"{base_url}/v1/execute", headers=headers, json=payload)
     return resp.json()
 
