@@ -157,22 +157,25 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 # --- 3. PREVIEW ---
 def exibir_preview_ficha(ficha):
-    """Exibe o layout da Ficha Catalográfica (Preview Visual)"""
+    """Exibe a Ficha Catalográfica formatada seguindo as normas (AACR2/ABNT)"""
     st.write("### Preview da Ficha Catalográfica")
     
-    # Criamos o HTML da ficha com formatação de cartela
+    # O recuo (margin-left) de 40px a 60px ajuda a alinhar o título embaixo da segunda letra
     preview_html = f"""
-    <div style="border: 2px solid #000; padding: 20px; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; line-height: 1.2;">
+    <div style="border: 2px solid #000; padding: 20px; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; line-height: 1.3;">
         <div style="text-align: center;">
             <p style="margin: 0;">{ficha.get('cdd') or '___'} - {ficha.get('cutter') or '___'}</p>
         </div>
-        <div style="margin-left: 40px; text-align: justify;">
-            <p style="margin: 5px 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título do trabalho')}: {ficha.get('subtitulo', '')} / {ficha.get('autor', '')}. – {ficha.get('ano_defesa', '2026')}.</p>
+        <div style="margin-left: 60px; text-align: justify; text-indent: -20px;">
+            <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – {ficha.get('ano_defesa', '2026')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', 'Trabalho de Conclusão de Curso')} – {ficha.get('instituicao', 'CDTN')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Bibliografia: {ficha.get('paginas_bibliografia', '____')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('keywords', '')}.</p>
+        </div>
+        <div style="margin-left: 40px; margin-top: 10px;">
+            <p style="margin: 0;">1. {ficha.get('keywords', '').replace(', ', '<br>1. ')}.</p>
         </div>
     </div>
     """
