@@ -154,88 +154,39 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 import streamlit as st
 
-# --- SIMULAÇÃO DE BANCO DE DADOS ---
-# Aqui você conectaria seu Turso/LibSQL
-def buscar_ficha_no_banco(id_ficha):
-    # Simulação: retorne dados do banco baseados no ID
-    return {
-        "autor": "Lobeu, Sabrina.",
-        "titulo": "Termo-energia nuclear",
-        "subtitulo": "Estudo de caso",
-        "ano": "2026",
-        "num_folhas": "200",
-        "orientador": "Dr. Silva, João",
-        "palavras_chave": "Energia nuclear, Termodinâmica"
-    }
+# --- SIMULAÇÃO: BUSCA DE TODAS AS FICHAS NO BANCO ---
+# No seu caso: db.execute("SELECT id, titulo, autor FROM acervo")
+lista_fichas_do_banco = [
+    {"id": 1, "titulo": "Termo-energia nuclear", "autor": "Lobeu, Sabrina."},
+    {"id": 2, "titulo": "Inteligência Artificial na Educação", "autor": "Silva, João."}
+]
 
-# --- INTERFACE PRINCIPAL ---
 st.title("Sistema de Catalogação")
 
-# PASSO 1: Seleção da Ficha (O sistema só faz algo depois que o usuário escolhe)
-id_escolhido = st.text_input("Digite o ID da ficha para buscar:")
+# --- PASSO 1: SELEÇÃO DA FICHA ---
+# Criamos uma lista formatada para o selectbox
+opcoes = {f"{f['titulo']} ({f['autor']})": f for f in lista_fichas_do_banco}
+selecao = st.sidebar.selectbox("Selecione a ficha para editar:", options=list(opcoes.keys()))
 
-if st.button("Buscar Ficha"):
-    # Limpa a ficha anterior da memória antes de buscar a nova
-    st.session_state.ficha = buscar_ficha_no_banco(id_escolhido)
-    st.session_state.modo_edicao = False # Garante que não abra em modo edição direto
+# Quando ela seleciona, carregamos a ficha escolhida na memória
+if selecao:
+    ficha_selecionada = opcoes[selecao]
+    st.session_state.ficha = buscar_ficha_completa_no_banco(ficha_selecionada['id']) # Função fictícia
 
-# PASSO 2: Exibição e Edição (Só aparece se uma ficha foi carregada)
+# --- PASSO 2: PREVIEW E EDIÇÃO ---
 if 'ficha' in st.session_state:
-    st.divider()
-    
-    # Exibe o Preview (limpo)
+    st.subheader("Visualização da Ficha")
     abrir_visualizacao_ficha(st.session_state.ficha)
     
-    # Botão de edição separado do preview
-    if st.button("✏️ Editar esta ficha"):
+    # Botão de editar que abre o formulário abaixo
+    if st.button("✏️ Editar campos desta ficha"):
         st.session_state.modo_edicao = True
-        st.rerun()
-
-    # Só mostra o formulário de edição se o usuário clicar no botão
+        
     if st.session_state.get('modo_edicao', False):
-        st.subheader("Modo de Edição Seletiva")
-        campos = st.multiselect("Selecione os campos para alterar:", 
-                                ["Autor", "Título", "Orientador", "Nº de Folhas", "Palavras-chave"])
-        
-        with st.form("form_edicao"):
-            # (Mantém a lógica de edição dos campos aqui...)
-            if "Autor" in campos:
-                st.session_state.ficha['autor'] = st.text_input("Autor", st.session_state.ficha['autor'])
-            # ... outros campos ...
-            
-            if st.form_submit_button("Atualizar Banco de Dados"):
-                st.success("Ficha atualizada com sucesso!")
-                st.session_state.modo_edicao = False
-                st.rerun()
-
-# --- INTERFACE PRINCIPAL ---
-st.title("Sistema de Catalogação")
-
-# 1. Preview Inicial
-abrir_visualizacao_ficha(st.session_state.ficha)
-
-# 2. Edição Seletiva
-if st.button("✏️ Editar campos da ficha"):
-    st.session_state.modo_edicao = True
-
-if st.session_state.get('modo_edicao', False):
-    campos = st.multiselect("Selecione o que deseja alterar:", 
-                            ["Autor", "Título", "Orientador", "Nº de Folhas", "Palavras-chave"])
-    
-    with st.form("form_edicao"):
-        if "Autor" in campos:
-            st.session_state.ficha['autor'] = st.text_input("Autor", st.session_state.ficha['autor'])
-        if "Título" in campos:
-            st.session_state.ficha['titulo'] = st.text_input("Título", st.session_state.ficha['titulo'])
-        if "Orientador" in campos:
-            st.session_state.ficha['orientador'] = st.text_input("Orientador", st.session_state.ficha['orientador'])
-        if "Nº de Folhas" in campos:
-            st.session_state.ficha['num_folhas'] = st.text_input("Nº de Folhas", st.session_state.ficha['num_folhas'])
-        if "Palavras-chave" in campos:
-            st.session_state.ficha['palavras_chave'] = st.text_area("Palavras-chave", st.session_state.ficha['palavras_chave'])
-        
-        if st.form_submit_button("Salvar no Banco"):
-            st.success("Dados enviados para o banco de dados!")
+        st.divider()
+        st.subheader("Modo de Edição")
+        # (Seu código de formulário de edição seletiva aqui...)
+        if st.button("Fechar Edição"):
             st.session_state.modo_edicao = False
             st.rerun()
 
