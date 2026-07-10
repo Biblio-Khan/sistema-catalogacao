@@ -214,7 +214,7 @@ def painel_edicao(ficha):
         "ano_defesa", "num_folhas", "paginas_bibliografia", "orientadores", "keywords"
     ]
     
-    campo_escolhido = st.selectbox("Ou selecionar outro campo para corrigir:", campos_editaveis)
+    campo_escolhido = st.selectbox("Selecione um campo para corrigir:", campos_editaveis)
     
     with st.form(f"form_edicao_{ficha.get('id')}_{campo_escolhido}"):
         valor_atual = ficha.get(campo_escolhido, "")
