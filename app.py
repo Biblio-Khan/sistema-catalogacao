@@ -199,17 +199,15 @@ selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
 id_sel = mapeamento[selecao]
 
 # --- CARREGAR DADOS DA FICHA ---
-if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
-    args_busca = [{"type": "integer", "value": id_sel}]
-    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", args_busca)
-    
-    # Acessando 'result' -> 'rows' -> linha 0
+# ... dentro do bloco de carregamento da ficha:
     if 'result' in dados_ficha and dados_ficha['result']['rows']:
         colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
         
-        # Extraindo os 'value' de cada campo da linha
         raw_row = dados_ficha['result']['rows'][0]
-        valores = [item['value'] for item in raw_row]
+        
+        # Extração segura: se 'value' não existir, coloca uma string vazia no lugar
+        valores = [item.get('value', "") if item is not None else "" for item in raw_row]
+        
         st.session_state.ficha = dict(zip(colunas, valores))
         st.session_state.id_atual = id_sel
 
