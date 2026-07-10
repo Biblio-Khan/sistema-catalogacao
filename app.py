@@ -155,6 +155,29 @@ def atualizar_ficha(id_ficha, cdd, cutter):
     sql = "UPDATE fichas SET cdd=?, cutter=? WHERE id=?"
     return executar_query(sql, [{"value": cdd}, {"value": cutter}, {"value": id_ficha}])
 
+# --- 3. PREVIEW ---
+def exibir_preview_ficha(ficha):
+    """Exibe o layout da Ficha Catalográfica (Preview Visual)"""
+    st.write("### Preview da Ficha Catalográfica")
+    
+    # Criamos o HTML da ficha com formatação de cartela
+    preview_html = f"""
+    <div style="border: 2px solid #000; padding: 20px; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; line-height: 1.2;">
+        <div style="text-align: center;">
+            <p style="margin: 0;">{ficha.get('cdd') or '___'} - {ficha.get('cutter') or '___'}</p>
+        </div>
+        <div style="margin-left: 40px; text-align: justify;">
+            <p style="margin: 5px 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título do trabalho')}: {ficha.get('subtitulo', '')} / {ficha.get('autor', '')}. – {ficha.get('ano_defesa', '2026')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', 'Trabalho de Conclusão de Curso')} – {ficha.get('instituicao', 'CDTN')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('keywords', '')}.</p>
+        </div>
+    </div>
+    """
+    st.markdown(preview_html, unsafe_allow_html=True)
+
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     st.write("### ✏️ Edição Técnica")
