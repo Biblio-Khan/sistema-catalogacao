@@ -201,7 +201,9 @@ def abrir_visualizacao_ficha(ficha, cdd, cutter):
         </p>
     </div>
     """
+    st.write("Conteúdo da ficha para debug:", ficha)
     st.markdown(html_template, unsafe_allow_html=True)
+
 
 # Atualize a interface:
 def interface_bibliotecaria():
