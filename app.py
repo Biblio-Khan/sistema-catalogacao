@@ -200,16 +200,16 @@ id_sel = mapeamento[selecao]
 
 # --- CARREGAR DADOS DA FICHA ---
 # ... dentro do bloco de carregamento da ficha:
-    if 'result' in dados_ficha and dados_ficha['result']['rows']:
-        colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
+if 'result' in dados_ficha and dados_ficha['result']['rows']:
+    colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
         
-        raw_row = dados_ficha['result']['rows'][0]
+    raw_row = dados_ficha['result']['rows'][0]
         
         # Extração segura: se 'value' não existir, coloca uma string vazia no lugar
-        valores = [item.get('value', "") if item is not None else "" for item in raw_row]
+    valores = [item.get('value', "") if item is not None else "" for item in raw_row]
         
-        st.session_state.ficha = dict(zip(colunas, valores))
-        st.session_state.id_atual = id_sel
+    st.session_state.ficha = dict(zip(colunas, valores))
+    st.session_state.id_atual = id_sel
 
 # --- INTERFACE ---
 col1, col2 = st.columns(2)
