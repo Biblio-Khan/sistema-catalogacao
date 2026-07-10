@@ -129,7 +129,7 @@ import httpx
 
 # --- CONFIGURAÇÃO ---
 st.set_page_config(layout="wide")
-st.title("📚 Sistema de Gestão de Fichas")
+st.title(" Sistema de Gestão de Fichas")
 
 # --- FUNÇÃO DE ATUALIZAÇÃO (APIs REST TURSO) ---
 def atualizar_ficha_no_turso(dados):
@@ -172,7 +172,7 @@ def atualizar_ficha_no_turso(dados):
 
 
 # O método execute do libsql-client retorna o objeto de resposta diretamente
-resultado = db.execute("SELECT id, titulo, autor FROM fichas")
+
 
 # As linhas retornadas estão dentro de 'rows'
 fichas = resultado.rows
@@ -196,7 +196,7 @@ dados_banco = resultado_detalhe.rows[0]
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.subheader("👁️ Preview da Ficha")
+    st.subheader(" Preview da Ficha")
     st.json(st.session_state.ficha)
 
 with col2:
