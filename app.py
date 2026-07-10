@@ -171,8 +171,10 @@ def atualizar_ficha_no_turso(dados):
         st.error(f"Erro ao atualizar: {response.text}")
 
 # --- PAINEL LATERAL (SELEÇÃO) ---
-fichas = db.execute("SELECT id, titulo, autor FROM fichas").fetchall()
-mapeamento = {f"{f['titulo']} - {f['autor']}": f['id'] for f in fichas}
+# Criar o cursor primeiro
+cursor = db.cursor()
+cursor.execute("SELECT id, titulo, autor FROM fichas")
+fichas = cursor.fetchall()
 
 st.sidebar.subheader("Catálogo")
 selecao_nome = st.sidebar.selectbox("Selecione a obra:", list(mapeamento.keys()))
