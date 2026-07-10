@@ -173,29 +173,26 @@ def atualizar_ficha_no_turso(dados):
 
 def executar_query(sql, args=None):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
-    headers = {
-        "Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
     payload = {"stmt": {"sql": sql, "args": args or []}}
-    
     with httpx.Client() as client:
         response = client.post(f"{base_url}/v1/execute", headers=headers, json=payload)
     return response.json()
 
-# --- BUSCA DE LISTA ---
+# --- BUSCA DA LISTA ---
 dados_lista = executar_query("SELECT id, titulo, autor FROM fichas")
 mapeamento = {}
+
 if 'result' in dados_lista:
-    # A estrutura da sua resposta contém 'rows' dentro de 'result' diretamente
-    fichas_lista = dados_lista['result']['rows']
-    # Como os valores estão dentro de objetos {'type': '...', 'value': '...'}, 
-    # precisamos extrair apenas o 'value'
-    mapeamento = {f"{f[1]['value']} - {f[2]['value']}": f[0]['value'] for f in fichas_lista}
-# --- SELEÇÃO ---
+    # Navegando na estrutura correta que você enviou:
+    for row in dados_lista['result']['rows']:
+        id_val = row[0]['value']
+        titulo = row[1]['value']
+        autor = row[2]['value']
+        mapeamento[f"{titulo} - {autor}"] = id_val
+
 if not mapeamento:
-    st.error("Nenhuma ficha encontrada no banco.")
-    st.write("Resposta do banco:", dados_lista)
+    st.error("Nenhuma ficha encontrada.")
     st.stop()
 
 selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
@@ -206,11 +203,14 @@ if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
     args_busca = [{"type": "integer", "value": id_sel}]
     dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", args_busca)
     
-    colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
-    
-    if 'results' in dados_ficha and dados_ficha['results'][0]['response']['rows']:
-        linha = dados_ficha['results'][0]['response']['rows'][0]
-        st.session_state.ficha = dict(zip(colunas, linha))
+    # Acessando 'result' -> 'rows' -> linha 0
+    if 'result' in dados_ficha and dados_ficha['result']['rows']:
+        colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
+        
+        # Extraindo os 'value' de cada campo da linha
+        raw_row = dados_ficha['result']['rows'][0]
+        valores = [item['value'] for item in raw_row]
+        st.session_state.ficha = dict(zip(colunas, valores))
         st.session_state.id_atual = id_sel
 
 # --- INTERFACE ---
@@ -220,17 +220,16 @@ with col1:
 
 with col2:
     if st.button("✏️ Editar"): st.session_state.modo_edicao = True
-    
     if st.session_state.get('modo_edicao'):
         with st.form("edit_form"):
             campos = ['instituicao', 'autor', 'titulo', 'subtitulo', 'tipo_trabalho', 'area_concentracao', 'ano_defesa', 'num_folhas', 'orientadores', 'coorientadores', 'keywords']
             for campo in campos:
-                st.session_state.ficha[campo] = st.text_input(campo.capitalize(), st.session_state.ficha[campo])
+                st.session_state.ficha[campo] = st.text_input(campo.capitalize(), st.session_state.ficha.get(campo, ""))
             
             if st.form_submit_button("Salvar"):
                 sql_update = """UPDATE fichas SET instituicao=?, autor=?, titulo=?, subtitulo=?, tipo_trabalho=?, area_concentracao=?, ano_defesa=?, num_folhas=?, orientadores=?, coorientadores=?, keywords=? WHERE id=?"""
                 args = [{"type": "text", "value": str(st.session_state.ficha[c])} for c in campos]
-                args.append({"type": "integer", "value": st.session_state.ficha['id']})
+                args.append({"type": "integer", "value": int(st.session_state.ficha['id'])})
                 
                 if executar_query(sql_update, args):
                     st.success("Salvo com sucesso!")
