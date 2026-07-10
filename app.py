@@ -160,7 +160,8 @@ def exibir_preview_ficha(ficha):
     """Exibe a Ficha Catalográfica formatada seguindo as normas (AACR2/ABNT)"""
     st.write("### Preview da Ficha Catalográfica")
     
-    # O recuo (margin-left) de 40px a 60px ajuda a alinhar o título embaixo da segunda letra
+    # CSS: margin-left ajusta o recuo do corpo da ficha em relação ao autor
+    # text-indent: -20px faz a segunda linha recuar, criando o efeito de alinhamento desejado
     preview_html = f"""
     <div style="border: 2px solid #000; padding: 20px; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; line-height: 1.3;">
         <div style="text-align: center;">
@@ -170,9 +171,7 @@ def exibir_preview_ficha(ficha):
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – {ficha.get('ano_defesa', '2026')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Bibliografia: {ficha.get('paginas_bibliografia', '____')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Inclui bibliografia.</p>
         </div>
         <div style="margin-left: 40px; margin-top: 10px;">
             <p style="margin: 0;">1. {ficha.get('keywords', '').replace(', ', '<br>1. ')}.</p>
