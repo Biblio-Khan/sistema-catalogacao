@@ -154,10 +154,11 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 import streamlit as st
 
-# --- SIMULAÇÃO DE INICIALIZAÇÃO ---
-# No seu sistema real, os dados viriam do banco (ex: db.execute("SELECT..."))
-if 'ficha' not in st.session_state:
-    st.session_state.ficha = {
+# --- SIMULAÇÃO DE BANCO DE DADOS ---
+# Aqui você conectaria seu Turso/LibSQL
+def buscar_ficha_no_banco(id_ficha):
+    # Simulação: retorne dados do banco baseados no ID
+    return {
         "autor": "Lobeu, Sabrina.",
         "titulo": "Termo-energia nuclear",
         "subtitulo": "Estudo de caso",
@@ -167,35 +168,45 @@ if 'ficha' not in st.session_state:
         "palavras_chave": "Energia nuclear, Termodinâmica"
     }
 
-# --- FUNÇÃO DE VISUALIZAÇÃO (PREVIEW) ---
-def abrir_visualizacao_ficha(ficha, cdd='---', cutter='---'):
-    # Processamento de dados
-    autor = ficha.get('autor') or ""
-    titulo = ficha.get('titulo') or "Título não informado"
-    subtitulo = ficha.get('subtitulo')
-    subtitulo_formatado = f": {subtitulo}" if subtitulo else ""
-    folhas = ficha.get('num_folhas') or "0"
-    ano = ficha.get('ano_defesa') or ficha.get('ano') or ""
-    orientador = ficha.get('orientador') or ""
-    palavras = [p.strip() for p in ficha.get('palavras_chave', "").split(",") if p.strip()]
-    lista_html = "".join([f"<li>{i+1}. {item}</li>" for i, item in enumerate(palavras)])
+# --- INTERFACE PRINCIPAL ---
+st.title("Sistema de Catalogação")
 
-    # Renderização HTML
-    html_template = f"""
-    <div style="
-        border: 1px solid #000; padding: 25px; width: 450px; 
-        font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.4;
-    ">
-        <p style="text-align: center; margin: 0 0 20px 0;">{cutter}</p>
-        <p style="margin: 0;">{autor}.</p>
-        <p style="margin: 0; padding-left: 20px;">{titulo}{subtitulo_formatado} / {autor}. – {ano}.</p>
-        <p style="margin: 0; padding-left: 20px;">{folhas} f.</p>
-        <p style="margin: 0; padding-left: 20px;">Orientador: {orientador}.</p>
-        <p style="margin: 0; padding-top: 10px; padding-left: 20px;">Palavras-chave: <ol>{lista_html}</ol></p>
-        <p style="margin: 0; padding-top: 10px; padding-left: 40px;">{cdd}</p>
-    </div>
-    """
-    st.markdown(html_template, unsafe_allow_html=True)
+# PASSO 1: Seleção da Ficha (O sistema só faz algo depois que o usuário escolhe)
+id_escolhido = st.text_input("Digite o ID da ficha para buscar:")
+
+if st.button("Buscar Ficha"):
+    # Limpa a ficha anterior da memória antes de buscar a nova
+    st.session_state.ficha = buscar_ficha_no_banco(id_escolhido)
+    st.session_state.modo_edicao = False # Garante que não abra em modo edição direto
+
+# PASSO 2: Exibição e Edição (Só aparece se uma ficha foi carregada)
+if 'ficha' in st.session_state:
+    st.divider()
+    
+    # Exibe o Preview (limpo)
+    abrir_visualizacao_ficha(st.session_state.ficha)
+    
+    # Botão de edição separado do preview
+    if st.button("✏️ Editar esta ficha"):
+        st.session_state.modo_edicao = True
+        st.rerun()
+
+    # Só mostra o formulário de edição se o usuário clicar no botão
+    if st.session_state.get('modo_edicao', False):
+        st.subheader("Modo de Edição Seletiva")
+        campos = st.multiselect("Selecione os campos para alterar:", 
+                                ["Autor", "Título", "Orientador", "Nº de Folhas", "Palavras-chave"])
+        
+        with st.form("form_edicao"):
+            # (Mantém a lógica de edição dos campos aqui...)
+            if "Autor" in campos:
+                st.session_state.ficha['autor'] = st.text_input("Autor", st.session_state.ficha['autor'])
+            # ... outros campos ...
+            
+            if st.form_submit_button("Atualizar Banco de Dados"):
+                st.success("Ficha atualizada com sucesso!")
+                st.session_state.modo_edicao = False
+                st.rerun()
 
 # --- INTERFACE PRINCIPAL ---
 st.title("Sistema de Catalogação")
