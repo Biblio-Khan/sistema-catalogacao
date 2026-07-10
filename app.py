@@ -171,50 +171,45 @@ def atualizar_ficha_no_turso(dados):
 
 # --- FUNÇÃO CENTRAL DE API (Com tratamento de erro) ---
 def painel_edicao():
-    st.subheader("Painel de Edição de Fichas")
-
-    # 1. Busca da Lista
-    dados = executar_query("SELECT id, titulo, autor FROM fichas")
-    linhas = dados.get('result', {}).get('rows', [])
-    lista_fichas = {f"{r[1]['value']} - {r[2]['value']}": r[0]['value'] for r in linhas}
-
-    if not lista_fichas:
-        st.error("Nenhuma ficha encontrada.")
-        return
-
-    # 2. Seleção
-    selecao = st.sidebar.selectbox("Escolha a obra para editar:", list(lista_fichas.keys()))
-    id_selecionado = lista_fichas[selecao]
-
-    # 3. Busca dos dados completos da ficha selecionada
-    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [{"value": id_selecionado}])
-    row = dados_ficha.get('result', {}).get('rows', [[]])[0]
+    st.subheader("Painel de Catalogação")
     
-    colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
-    ficha = {colunas[i]: (row[i].get('value') if i < len(row) else "") for i in range(len(colunas))}
+    # Busca da ficha (mesma lógica anterior)
+    fichas = carregar_fichas()
+    if not fichas: return
+    
+    # 1. Seleção da ficha
+    ficha_selecionada = st.sidebar.selectbox("Ficha:", [f"{f['autor']} - {f['titulo']}" for f in fichas])
+    ficha = next(f for f in fichas if f"{f['autor']} - {f['titulo']}" == ficha_selecionada)
 
-    # 4. Exibição em Colunas (Organizado)
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.write("### Preview da Ficha")
-        st.json(ficha) # Exibe de forma limpa sem bagunçar a tela
+    # 2. Layout: Preview à esquerda, Edição à direita
+    col_preview, col_edicao = st.columns([1, 1])
 
-    with col2:
-        st.write("### Formulário de Edição")
-        with st.form("form_edicao_final"):
-            # Campos organizados
-            for campo in colunas[1:]: # Ignora o ID na edição
-                ficha[campo] = st.text_input(campo.replace("_", " ").capitalize(), ficha.get(campo, ""))
-            
-            if st.form_submit_button("Salvar Alterações no Banco"):
-                # Atualiza com todos os campos
-                sql = f"UPDATE fichas SET {','.join([f'{c}=?' for c in colunas[1:]])} WHERE id=?"
-                args = [{"value": ficha[c]} for c in colunas[1:]]
-                args.append({"value": id_selecionado})
-                
-                executar_query(sql, args)
-                st.success("Ficha atualizada!")
+    with col_edicao:
+        st.write("### Selecione o campo para editar")
+        campo_escolhido = st.selectbox("Campo:", list(ficha.keys()))
+        
+        # Formulário que atualiza direto no banco
+        with st.form("form_update"):
+            novo_valor = st.text_input(f"Editar {campo_escolhido}", value=ficha.get(campo_escolhido, ""))
+            if st.form_submit_button("Atualizar no Banco"):
+                # Query de update dinâmico
+                sql = f"UPDATE fichas SET {campo_escolhido}=? WHERE id=?"
+                executar_query(sql, [{"value": novo_valor}, {"value": ficha['id']}])
+                st.success("Atualizado!")
                 st.rerun()
+
+    with col_preview:
+        st.write("### Preview da Ficha")
+        # --- AQUI VAI O SEU DESIGN DA FICHA ---
+        # Exemplo simples, você pode formatar com HTML/Markdown para parecer uma ficha real
+        st.markdown(f"""
+        <div style="border: 1px solid #000; padding: 20px; font-family: serif;">
+            <p align="center"><b>{ficha.get('autor', 'AUTOR')}</b></p>
+            <p>{ficha.get('titulo', 'TÍTULO')}. 
+            {ficha.get('ano_defesa', 'ANO')}. {ficha.get('num_folhas', '0')} f.</p>
+            <p>Orientador: {ficha.get('orientadores', '')}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # --- COMO CHAMAR NO SEU FLUXO PRINCIPAL ---
 # Basta chamar painel_edicao() apenas quando a bibliotecária estiver logada
