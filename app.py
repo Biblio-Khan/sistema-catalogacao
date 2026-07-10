@@ -186,10 +186,12 @@ def executar_query(sql, args=None):
 # --- BUSCA DE LISTA ---
 dados_lista = executar_query("SELECT id, titulo, autor FROM fichas")
 mapeamento = {}
-if 'results' in dados_lista:
-    fichas_lista = dados_lista['results'][0]['response']['rows']
-    mapeamento = {f"{f[1]} - {f[2]}": f[0] for f in fichas_lista}
-
+if 'result' in dados_lista:
+    # A estrutura da sua resposta contém 'rows' dentro de 'result' diretamente
+    fichas_lista = dados_lista['result']['rows']
+    # Como os valores estão dentro de objetos {'type': '...', 'value': '...'}, 
+    # precisamos extrair apenas o 'value'
+    mapeamento = {f"{f[1]['value']} - {f[2]['value']}": f[0]['value'] for f in fichas_lista}
 # --- SELEÇÃO ---
 if not mapeamento:
     st.error("Nenhuma ficha encontrada no banco.")
