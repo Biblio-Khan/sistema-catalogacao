@@ -203,7 +203,14 @@ if 'results' in dados_lista and len(dados_lista['results']) > 0:
 
 # 2. Carregar ficha completa
 if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
-    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [id_sel])
+    # 1. Debug: Verifique se id_sel tem valor
+    st.sidebar.write(f"ID selecionado: {id_sel}") 
+
+    # 2. Formato obrigatório da API REST do Turso para parâmetros:
+    # A API não aceita apenas [id_sel], ela exige o formato de objeto com 'value'
+    args_formatados = [{"value": id_sel}]
+    
+    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", args_formatados)
     colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
     st.session_state.ficha = dict(zip(colunas, dados_ficha['results'][0]['response']['rows'][0]))
     st.session_state.id_atual = id_sel
