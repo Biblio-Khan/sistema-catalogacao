@@ -129,7 +129,6 @@ import httpx
 
 # --- CONFIGURAÇÃO ---
 st.set_page_config(layout="wide")
-st.title(" Sistema de Gestão de Fichas")
 
 # --- FUNÇÃO DE ATUALIZAÇÃO (APIs REST TURSO) ---
 def atualizar_ficha_no_turso(dados):
