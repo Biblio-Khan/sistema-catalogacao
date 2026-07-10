@@ -124,63 +124,97 @@ def check_password():
     return st.session_state["password_correct"]
 
 # Adicione esta função ao seu script
-def atualizar_ficha(id_ficha, cdd, cutter):
+import streamlit as st
+import httpx
+
+# --- CONFIGURAÇÃO ---
+st.set_page_config(layout="wide")
+st.title("📚 Sistema de Gestão de Fichas")
+
+# --- FUNÇÃO DE ATUALIZAÇÃO (APIs REST TURSO) ---
+def atualizar_ficha_no_turso(dados):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
     url = f"{base_url}/v1/execute"
-    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
+    token = st.secrets['TURSO_TOKEN']
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     
     payload = {
         "stmt": {
-            "sql": "UPDATE fichas SET cdd = ?, cutter = ?, status = 'Aprovado' WHERE id = ?",
+            "sql": """
+            UPDATE fichas SET 
+                instituicao = ?, autor = ?, titulo = ?, subtitulo = ?, 
+                tipo_trabalho = ?, area_concentracao = ?, ano_defesa = ?, 
+                num_folhas = ?, orientadores = ?, coorientadores = ?, keywords = ?
+            WHERE id = ?
+            """,
             "args": [
-                {"type": "text", "value": cdd},
-                {"type": "text", "value": cutter},
-                {"type": "integer", "value": id_ficha}
+                {"type": "text", "value": dados['instituicao']},
+                {"type": "text", "value": dados['autor']},
+                {"type": "text", "value": dados['titulo']},
+                {"type": "text", "value": dados['subtitulo']},
+                {"type": "text", "value": dados['tipo_trabalho']},
+                {"type": "text", "value": dados['area_concentracao']},
+                {"type": "text", "value": str(dados['ano_defesa'])},
+                {"type": "text", "value": str(dados['num_folhas'])},
+                {"type": "text", "value": dados['orientadores']},
+                {"type": "text", "value": dados['coorientadores']},
+                {"type": "text", "value": dados['keywords']},
+                {"type": "integer", "value": dados['id']}
             ]
         }
     }
-    
     with httpx.Client() as client:
-        return client.post(url, headers=headers, json=payload)
+        response = client.post(url, headers=headers, json=payload)
+    if response.status_code == 200:
+        st.success("Ficha atualizada com sucesso!")
+    else:
+        st.error(f"Erro ao atualizar: {response.text}")
 
-import streamlit as st
+# --- PAINEL LATERAL (SELEÇÃO) ---
+fichas = db.execute("SELECT id, titulo, autor FROM fichas").fetchall()
+mapeamento = {f"{f['titulo']} - {f['autor']}": f['id'] for f in fichas}
 
-# --- SIMULAÇÃO: BUSCA DE TODAS AS FICHAS NO BANCO ---
-# No seu caso: db.execute("SELECT id, titulo, autor FROM acervo")
-lista_fichas_do_banco = [
-    {"id": 1, "titulo": "Termo-energia nuclear", "autor": "Lobeu, Sabrina."},
-    {"id": 2, "titulo": "Inteligência Artificial na Educação", "autor": "Silva, João."}
-]
+st.sidebar.subheader("Catálogo")
+selecao_nome = st.sidebar.selectbox("Selecione a obra:", list(mapeamento.keys()))
+id_selecionado = mapeamento[selecao_nome]
 
-st.title("Sistema de Catalogação")
+# Carrega a ficha no estado
+if 'id_atual' not in st.session_state or st.session_state.id_atual != id_selecionado:
+    dados_banco = db.execute("SELECT * FROM fichas WHERE id = ?", (id_selecionado,)).fetchone()
+    st.session_state.ficha = dict(dados_banco)
+    st.session_state.id_atual = id_selecionado
+    st.session_state.modo_edicao = False
 
-# --- PASSO 1: SELEÇÃO DA FICHA ---
-# Criamos uma lista formatada para o selectbox
-opcoes = {f"{f['titulo']} ({f['autor']})": f for f in lista_fichas_do_banco}
-selecao = st.sidebar.selectbox("Selecione a ficha para editar:", options=list(opcoes.keys()))
+# --- PAINEL CENTRAL ---
+col1, col2 = st.columns([1, 1])
 
-# Quando ela seleciona, carregamos a ficha escolhida na memória
-if selecao:
-    ficha_selecionada = opcoes[selecao]
-    st.session_state.ficha = buscar_ficha_completa_no_banco(ficha_selecionada['id']) # Função fictícia
+with col1:
+    st.subheader("👁️ Preview da Ficha")
+    st.json(st.session_state.ficha)
 
-# --- PASSO 2: PREVIEW E EDIÇÃO ---
-if 'ficha' in st.session_state:
-    st.subheader("Visualização da Ficha")
-    abrir_visualizacao_ficha(st.session_state.ficha)
-    
-    # Botão de editar que abre o formulário abaixo
+with col2:
+    st.subheader("⚙️ Edição")
     if st.button("✏️ Editar campos desta ficha"):
         st.session_state.modo_edicao = True
-        
-    if st.session_state.get('modo_edicao', False):
-        st.divider()
-        st.subheader("Modo de Edição")
-        # (Seu código de formulário de edição seletiva aqui...)
-        if st.button("Fechar Edição"):
-            st.session_state.modo_edicao = False
-            st.rerun()
+    
+    if st.session_state.modo_edicao:
+        with st.form("form_edicao"):
+            st.session_state.ficha['instituicao'] = st.text_input("Instituição", st.session_state.ficha['instituicao'])
+            st.session_state.ficha['autor'] = st.text_input("Autor", st.session_state.ficha['autor'])
+            st.session_state.ficha['titulo'] = st.text_input("Título", st.session_state.ficha['titulo'])
+            st.session_state.ficha['subtitulo'] = st.text_input("Subtítulo", st.session_state.ficha['subtitulo'])
+            st.session_state.ficha['tipo_trabalho'] = st.text_input("Tipo de Trabalho", st.session_state.ficha['tipo_trabalho'])
+            st.session_state.ficha['area_concentracao'] = st.text_input("Área de Concentração", st.session_state.ficha['area_concentracao'])
+            st.session_state.ficha['ano_defesa'] = st.text_input("Ano de Defesa", st.session_state.ficha['ano_defesa'])
+            st.session_state.ficha['num_folhas'] = st.text_input("Nº de Folhas", st.session_state.ficha['num_folhas'])
+            st.session_state.ficha['orientadores'] = st.text_input("Orientadores", st.session_state.ficha['orientadores'])
+            st.session_state.ficha['coorientadores'] = st.text_input("Coorientadores", st.session_state.ficha['coorientadores'])
+            st.session_state.ficha['keywords'] = st.text_area("Palavras-chave", st.session_state.ficha['keywords'])
 
+            if st.form_submit_button("Salvar no Banco"):
+                atualizar_ficha_no_turso(st.session_state.ficha)
+                st.session_state.modo_edicao = False
+                st.rerun()
 
 # Atualize a interface:
 def interface_bibliotecaria():
