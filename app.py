@@ -171,64 +171,54 @@ def atualizar_ficha_no_turso(dados):
         st.error(f"Erro ao atualizar: {response.text}")
 
 # --- FUNÇÃO CENTRAL DE API (Com tratamento de erro) ---
-import streamlit as st
-import httpx
+def painel_edicao():
+    st.subheader("Painel de Edição de Fichas")
 
-# --- CONFIGURAÇÃO ---
-def executar_query(sql, args=None):
-    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
-    payload = {"stmt": {"sql": sql, "args": args or []}}
-    headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
-    resp = httpx.post(f"{base_url}/v1/execute", headers=headers, json=payload)
-    return resp.json()
+    # 1. Busca da Lista
+    dados = executar_query("SELECT id, titulo, autor FROM fichas")
+    linhas = dados.get('result', {}).get('rows', [])
+    lista_fichas = {f"{r[1]['value']} - {r[2]['value']}": r[0]['value'] for r in linhas}
 
-st.title("📚 Sistema de Catalogação")
+    if not lista_fichas:
+        st.error("Nenhuma ficha encontrada.")
+        return
 
-# --- 1. BUSCA DE LISTA ---
-dados = executar_query("SELECT id, titulo, autor FROM fichas")
-linhas = dados.get('result', {}).get('rows', [])
-lista_fichas = {f"{r[1]['value']} - {r[2]['value']}": r[0]['value'] for r in linhas}
+    # 2. Seleção
+    selecao = st.sidebar.selectbox("Escolha a obra para editar:", list(lista_fichas.keys()))
+    id_selecionado = lista_fichas[selecao]
 
-if not lista_fichas:
-    st.error("Nenhuma ficha encontrada.")
-    st.stop()
+    # 3. Busca dos dados completos da ficha selecionada
+    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [{"value": id_selecionado}])
+    row = dados_ficha.get('result', {}).get('rows', [[]])[0]
+    
+    colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
+    ficha = {colunas[i]: (row[i].get('value') if i < len(row) else "") for i in range(len(colunas))}
 
-# --- 2. SELEÇÃO ---
-selecao = st.sidebar.selectbox("Escolha a obra:", list(lista_fichas.keys()))
-id_selecionado = lista_fichas[selecao]
+    # 4. Exibição em Colunas (Organizado)
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.write("### Preview da Ficha")
+        st.json(ficha) # Exibe de forma limpa sem bagunçar a tela
 
-# --- 3. GARANTIA DA FICHA ---
-# Buscamos a ficha do banco e a guardamos no session_state imediatamente
-dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [{"value": id_selecionado}])
-row = dados_ficha.get('result', {}).get('rows', [[]])[0]
-
-colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
-# Cria a ficha garantindo que seja um dicionário
-st.session_state.ficha = {colunas[i]: (row[i].get('value') if i < len(row) else "") for i in range(len(colunas))}
-
-# --- 4. EXIBIÇÃO E EDIÇÃO ---
-st.write("### Preview da Ficha Selecionada")
-st.json(st.session_state.ficha)
-
-if st.button("✏️ Editar"): 
-    st.session_state.modo_edicao = True
-
-if st.session_state.get('modo_edicao'):
-    with st.form("form_edicao"):
-        # Editamos os campos necessários
-        campos = ["instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords"]
-        for campo in campos:
-            st.session_state.ficha[campo] = st.text_input(campo.capitalize(), st.session_state.ficha.get(campo, ""))
-        
-        if st.form_submit_button("Salvar"):
-            sql = "UPDATE fichas SET instituicao=?, autor=?, titulo=?, subtitulo=?, tipo_trabalho=?, area_concentracao=?, ano_defesa=?, num_folhas=?, orientadores=?, coorientadores=?, keywords=? WHERE id=?"
-            args = [{"value": st.session_state.ficha[c]} for c in campos]
-            args.append({"value": id_selecionado})
+    with col2:
+        st.write("### Formulário de Edição")
+        with st.form("form_edicao_final"):
+            # Campos organizados
+            for campo in colunas[1:]: # Ignora o ID na edição
+                ficha[campo] = st.text_input(campo.replace("_", " ").capitalize(), ficha.get(campo, ""))
             
-            executar_query(sql, args)
-            st.success("Salvo com sucesso!")
-            st.session_state.modo_edicao = False
-            st.rerun()
+            if st.form_submit_button("Salvar Alterações no Banco"):
+                # Atualiza com todos os campos
+                sql = f"UPDATE fichas SET {','.join([f'{c}=?' for c in colunas[1:]])} WHERE id=?"
+                args = [{"value": ficha[c]} for c in colunas[1:]]
+                args.append({"value": id_selecionado})
+                
+                executar_query(sql, args)
+                st.success("Ficha atualizada!")
+                st.rerun()
+
+# --- COMO CHAMAR NO SEU FLUXO PRINCIPAL ---
+# Basta chamar painel_edicao() apenas quando a bibliotecária estiver logada
 
 # Atualize a interface:
 def interface_bibliotecaria():
