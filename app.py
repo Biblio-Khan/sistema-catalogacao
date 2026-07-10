@@ -203,7 +203,7 @@ if 'results' in dados_lista and len(dados_lista['results']) > 0:
 
 # 2. Carregar ficha completa
 if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
-    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [{"type": "integer", "value": id_sel}])
+    dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [id_sel])
     colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
     st.session_state.ficha = dict(zip(colunas, dados_ficha['results'][0]['response']['rows'][0]))
     st.session_state.id_atual = id_sel
