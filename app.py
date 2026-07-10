@@ -172,21 +172,34 @@ def atualizar_ficha_no_turso(dados):
 
 
 def executar_query(sql, args=None):
+    # Definindo as variáveis aqui dentro para garantir que elas sempre existam
+    base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
+    headers = {
+        "Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+    
     payload = {"stmt": {"sql": sql, "args": args or []}}
+    
     with httpx.Client() as client:
-        response = client.post(f"{BASE_URL}/v1/execute", headers=HEADERS, json=payload)
+        response = client.post(f"{base_url}/v1/execute", headers=headers, json=payload)
+    
     return response.json()
 
 # --- PAINEL ---
 st.title("📚 Sistema de Catalogação")
 
-# 1. Carregar lista de fichas
+# 1. Carregar lista de fichas (Certifique-se de que a tabela se chama 'fichas')
+# Se der erro aqui, verifique se a tabela no banco é mesmo 'fichas'
 dados_lista = executar_query("SELECT id, titulo, autor FROM fichas")
-fichas_lista = dados_lista['results'][0]['response']['rows'] # Formato da API REST
-mapeamento = {f"{f[1]} - {f[2]}": f[0] for f in fichas_lista}
 
-selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
-id_sel = mapeamento[selecao]
+# Verificação de segurança: checa se a chave 'results' existe na resposta
+if 'results' in dados_lista and len(dados_lista['results']) > 0:
+    fichas_lista = dados_lista['results'][0]['response']['rows']
+    mapeamento = {f"{f[1]} - {f[2]}": f[0] for f in fichas_lista}
+
+    selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
+    id_sel = mapeamento[selecao]
 
 # 2. Carregar ficha completa
 if 'id_atual' not in st.session_state or st.session_state.id_atual != id_sel:
