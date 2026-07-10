@@ -193,6 +193,7 @@ if 'results' in dados_lista:
 # --- SELEÇÃO ---
 if not mapeamento:
     st.error("Nenhuma ficha encontrada no banco.")
+    st.write("Resposta do banco:", dados_lista)
     st.stop()
 
 selecao = st.sidebar.selectbox("Escolha a obra:", list(mapeamento.keys()))
