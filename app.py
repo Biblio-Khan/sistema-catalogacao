@@ -171,19 +171,21 @@ def atualizar_ficha_no_turso(dados):
         st.error(f"Erro ao atualizar: {response.text}")
 
 # --- FUNÇÃO CENTRAL DE API (Com tratamento de erro) ---
+import streamlit as st
+import httpx
+
+# --- CONFIGURAÇÃO ---
 def executar_query(sql, args=None):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
     payload = {"stmt": {"sql": sql, "args": args or []}}
     headers = {"Authorization": f"Bearer {st.secrets['TURSO_TOKEN']}", "Content-Type": "application/json"}
-    
     resp = httpx.post(f"{base_url}/v1/execute", headers=headers, json=payload)
     return resp.json()
 
 st.title("📚 Sistema de Catalogação")
 
-# --- 1. BUSCA SIMPLES ---
+# --- 1. BUSCA DE LISTA ---
 dados = executar_query("SELECT id, titulo, autor FROM fichas")
-# Extrai direto da resposta do Turso
 linhas = dados.get('result', {}).get('rows', [])
 lista_fichas = {f"{r[1]['value']} - {r[2]['value']}": r[0]['value'] for r in linhas}
 
@@ -195,64 +197,38 @@ if not lista_fichas:
 selecao = st.sidebar.selectbox("Escolha a obra:", list(lista_fichas.keys()))
 id_selecionado = lista_fichas[selecao]
 
-# --- 3. EXIBIÇÃO E EDIÇÃO ---
+# --- 3. GARANTIA DA FICHA ---
+# Buscamos a ficha do banco e a guardamos no session_state imediatamente
 dados_ficha = executar_query("SELECT * FROM fichas WHERE id = ?", [{"value": id_selecionado}])
 row = dados_ficha.get('result', {}).get('rows', [[]])[0]
 
-# Mapeamento simples (ajuste a ordem se precisar)
 colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
-ficha = {colunas[i]: (row[i].get('value') if i < len(row) else "") for i in range(len(colunas))}
+# Cria a ficha garantindo que seja um dicionário
+st.session_state.ficha = {colunas[i]: (row[i].get('value') if i < len(row) else "") for i in range(len(colunas))}
 
-st.write("### Editando:", ficha['titulo'])
+# --- 4. EXIBIÇÃO E EDIÇÃO ---
+st.write("### Preview da Ficha Selecionada")
+st.json(st.session_state.ficha)
 
-with st.form("form_edicao"):
-    for campo in ["instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords"]:
-        ficha[campo] = st.text_input(campo.capitalize(), ficha.get(campo, ""))
-    
-    if st.form_submit_button("Salvar"):
-        sql = "UPDATE fichas SET instituicao=?, autor=?, titulo=?, subtitulo=?, tipo_trabalho=?, area_concentracao=?, ano_defesa=?, num_folhas=?, orientadores=?, coorientadores=?, keywords=? WHERE id=?"
-        args = [{"value": ficha[c]} for c in ["instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords"]]
-        args.append({"value": id_selecionado})
+if st.button("✏️ Editar"): 
+    st.session_state.modo_edicao = True
+
+if st.session_state.get('modo_edicao'):
+    with st.form("form_edicao"):
+        # Editamos os campos necessários
+        campos = ["instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords"]
+        for campo in campos:
+            st.session_state.ficha[campo] = st.text_input(campo.capitalize(), st.session_state.ficha.get(campo, ""))
         
-        executar_query(sql, args)
-        st.success("Salvo!")
-        st.rerun()
-
-# --- CARREGAR DADOS DA FICHA ---
-# ... dentro do bloco de carregamento da ficha:
-if 'result' in dados_ficha and dados_ficha['result']['rows']:
-    colunas = ["id", "instituicao", "autor", "titulo", "subtitulo", "tipo_trabalho", "area_concentracao", "ano_defesa", "num_folhas", "orientadores", "coorientadores", "keywords", "ilustracoes", "paginas_bibliografia"]
-        
-    raw_row = dados_ficha['result']['rows'][0]
-        
-        # Extração segura: se 'value' não existir, coloca uma string vazia no lugar
-    valores = [item.get('value', "") if item is not None else "" for item in raw_row]
-        
-    st.session_state.ficha = dict(zip(colunas, valores))
-    st.session_state.id_atual = id_sel
-
-# --- INTERFACE ---
-col1, col2 = st.columns(2)
-with col1:
-    st.write("### Preview", st.session_state.ficha)
-
-with col2:
-    if st.button("✏️ Editar"): st.session_state.modo_edicao = True
-    if st.session_state.get('modo_edicao'):
-        with st.form("edit_form"):
-            campos = ['instituicao', 'autor', 'titulo', 'subtitulo', 'tipo_trabalho', 'area_concentracao', 'ano_defesa', 'num_folhas', 'orientadores', 'coorientadores', 'keywords']
-            for campo in campos:
-                st.session_state.ficha[campo] = st.text_input(campo.capitalize(), st.session_state.ficha.get(campo, ""))
+        if st.form_submit_button("Salvar"):
+            sql = "UPDATE fichas SET instituicao=?, autor=?, titulo=?, subtitulo=?, tipo_trabalho=?, area_concentracao=?, ano_defesa=?, num_folhas=?, orientadores=?, coorientadores=?, keywords=? WHERE id=?"
+            args = [{"value": st.session_state.ficha[c]} for c in campos]
+            args.append({"value": id_selecionado})
             
-            if st.form_submit_button("Salvar"):
-                sql_update = """UPDATE fichas SET instituicao=?, autor=?, titulo=?, subtitulo=?, tipo_trabalho=?, area_concentracao=?, ano_defesa=?, num_folhas=?, orientadores=?, coorientadores=?, keywords=? WHERE id=?"""
-                args = [{"type": "text", "value": str(st.session_state.ficha[c])} for c in campos]
-                args.append({"type": "integer", "value": int(st.session_state.ficha['id'])})
-                
-                if executar_query(sql_update, args):
-                    st.success("Salvo com sucesso!")
-                    st.session_state.modo_edicao = False
-                    st.rerun()
+            executar_query(sql, args)
+            st.success("Salvo com sucesso!")
+            st.session_state.modo_edicao = False
+            st.rerun()
 
 # Atualize a interface:
 def interface_bibliotecaria():
