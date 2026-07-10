@@ -182,36 +182,37 @@ def exibir_preview_ficha(ficha):
 
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
-    st.write("### ✏️ Edição Dinâmica de Ficha")
+    st.write("### ✏️ Edição Dinâmica")
     
-    # Lista de campos permitidos para edição. 
-    # Certifique-se que estes nomes batem exatamente com as colunas do seu banco de dados.
-    campos_editaveis = [
-        "titulo", "subtitulo", "autor", "instituicao", "tipo_trabalho", 
-        "area_concentracao", "ano_defesa", "num_folhas", "paginas_bibliografia", 
-        "orientadores", "coorientadores", "keywords", "ilustracoes", "cdd", "cutter"
-    ]
+    campos_editaveis = ["titulo", "autor", "cdd", "cutter", "ano_defesa"]
     
-    # 1. Seleção do campo que a bibliotecária deseja corrigir
-    campo_escolhido = st.selectbox("Selecione o campo que deseja alterar:", campos_editaveis)
+    campo_escolhido = st.selectbox("Selecione o campo:", campos_editaveis, key=f"sel_{ficha.get('id')}")
     
-    # 2. Formulário para o campo selecionado
-    with st.form(f"form_edicao_{ficha.get('id')}_{campo_escolhido}"):
-        # Pega o valor atual para já aparecer preenchido no input
+    with st.form(f"form_edicao_{ficha.get('id')}"):
         valor_atual = ficha.get(campo_escolhido, "")
+        novo_valor = st.text_input(f"Editar {campo_escolhido}:", value=valor_atual)
         
-        # Cria o campo de entrada para a edição
-        novo_valor = st.text_input(f"Editar {campo_escolhido.replace('_', ' ').capitalize()}:", value=valor_atual)
+        btn_salvar = st.form_submit_button("Salvar")
         
-        # Botão de salvar
-        if st.form_submit_button("Salvar alteração no banco"):
-            # Update dinâmico: o campo escolhido será atualizado na linha específica do ID
+        if btn_salvar:
+            # 1. Verifica se temos o ID
+            id_alvo = ficha.get('id')
+            if not id_alvo:
+                st.error("Erro: ID da ficha não encontrado.")
+                return
+
+            # 2. Executa a query
             sql = f"UPDATE fichas SET {campo_escolhido}=? WHERE id=?"
-            executar_query(sql, [{"value": novo_valor}, {"value": ficha.get('id')}])
+            resultado = executar_query(sql, [{"value": novo_valor}, {"value": id_alvo}])
             
-            st.success(f"Campo '{campo_escolhido}' atualizado com sucesso!")
-            # Recarrega a página para refletir a mudança no preview imediatamente
-            st.rerun()
+            # 3. Exibe o que aconteceu (Debug)
+            st.write("Resultado do Banco:", resultado)
+            
+            if "result" in resultado:
+                st.success("Sucesso! Recarregando...")
+                st.rerun()
+            else:
+                st.error(f"Erro ao salvar: {resultado}")
 
 # --- 4. PAINEL BIBLIOTECÁRIA (Onde tudo se junta) ---
 def interface_bibliotecaria():
