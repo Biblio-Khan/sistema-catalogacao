@@ -153,19 +153,52 @@ def atualizar_ficha(id_ficha, cdd, cutter):
         return client.post(url, headers=headers, json=payload)
 
 def abrir_visualizacao_ficha(ficha, cdd, cutter):
-    # Tratamento dos campos: Se for None, substitui por string vazia
+    # Campos básicos
     autor = ficha.get('autor') or ""
     titulo = ficha.get('titulo') or "Título não informado"
-    subtitulo = ficha.get('subtitulo') or ""
+    subtitulo = ficha.get('subtitulo')
+    subtitulo_formatado = f": {subtitulo}" if subtitulo else ""
     folhas = ficha.get('num_folhas') or "0"
+    ano = ficha.get('ano_defesa') or ""
+    
+    # Novos campos colhidos do banco
+    orientador = ficha.get('orientador') or ""
+    palavras_chave = ficha.get('palavras_chave', []) # Espera uma lista: ['Termo1', 'Termo2']
+    
+    # Formatação das palavras-chave (numeradas, conforme padrão)
+    lista_chaves = "".join([f"{i+1}. {item}. " for i, item in enumerate(palavras_chave)])
     
     html_template = f"""
-    <div style="border: 2px solid black; padding: 20px; width: 400px; font-family: serif;">
-        <p style="text-align: center;">{cutter or '---'}</p>
-        <p>{autor}.</p>
-        <p style="padding-left: 20px;">{titulo}: {subtitulo} / {autor}. - {ficha.get('ano_defesa', '')}.</p>
-        <p style="padding-left: 20px;">{folhas} f.</p>
-        <p style="padding-left: 40px;">{cdd or '---'}</p>
+    <div style="
+        border: 1px solid #000; 
+        padding: 25px; 
+        width: 450px; 
+        font-family: 'Times New Roman', serif; 
+        font-size: 12pt;
+        line-height: 1.4;
+    ">
+        <p style="text-align: center; margin: 0 0 20px 0;">{cutter or '---'}</p>
+        
+        <p style="margin: 0;">{autor}.</p>
+        
+        <p style="margin: 0; padding-left: 20px;">
+            {titulo}{subtitulo_formatado} / {autor}. – {ano}.
+        </p>
+        
+        <p style="margin: 0; padding-left: 20px;">
+            {folhas} f.</p>
+        
+        <p style="margin: 0; padding-left: 20px;">
+            Orientador: {orientador}.
+        </p>
+        
+        <p style="margin: 0; padding-top: 10px; padding-left: 20px;">
+            {lista_chaves}
+        </p>
+        
+        <p style="margin: 0; padding-top: 10px; padding-left: 40px;">
+            {cdd or '---'}
+        </p>
     </div>
     """
     st.markdown(html_template, unsafe_allow_html=True)
