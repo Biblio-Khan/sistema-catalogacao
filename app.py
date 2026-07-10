@@ -22,15 +22,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 # --- CONFIGURAÇÃO DO BANCO ---
-def get_db():
-    # Esta versão é síncrona e funciona perfeitamente no fluxo do Streamlit
-    return libsql.connect(
-        database="fichas.db", # Pode ser o nome do seu banco
-        sync_url=st.secrets["TURSO_URL"],
-        auth_token=st.secrets["TURSO_TOKEN"]
-    )
-
-def salvar_no_turso(dados):
+def atualizar_ficha_no_turso(dados):
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
     url = f"{base_url}/v1/execute"
     
@@ -40,17 +32,16 @@ def salvar_no_turso(dados):
         "Content-Type": "application/json"
     }
     
-    # O Turso espera os argumentos neste formato: [{"type": "text", "value": "exemplo"}]
-    # ou simplesmente uma lista de valores. Vamos tentar o formato esperado pela API REST:
-    # Ajuste: A API espera 'stmt' (o SQL) e 'args' (os valores)
+    # Mantendo rigorosamente o seu formato de payload
     payload = {
         "stmt": {
             "sql": """
-            INSERT INTO fichas (
-                instituicao, autor, titulo, subtitulo, tipo_trabalho, 
-                area_concentracao, ano_defesa, num_folhas, paginas_bibliografia, 
-                orientadores, coorientadores, keywords, ilustracoes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            UPDATE fichas SET 
+                instituicao = ?, autor = ?, titulo = ?, subtitulo = ?, 
+                tipo_trabalho = ?, area_concentracao = ?, ano_defesa = ?, 
+                num_folhas = ?, paginas_bibliografia = ?, orientadores = ?, 
+                coorientadores = ?, keywords = ?, ilustracoes = ?
+            WHERE id = ?
             """,
             "args": [
                 {"type": "text", "value": dados['instituicao']},
@@ -65,7 +56,8 @@ def salvar_no_turso(dados):
                 {"type": "text", "value": dados['orientadores']},
                 {"type": "text", "value": dados['coorientadores']},
                 {"type": "text", "value": dados['keywords']},
-                {"type": "text", "value": dados['ilustracoes']}
+                {"type": "text", "value": dados['ilustracoes']},
+                {"type": "integer", "value": dados['id']} # O id que garante a atualização correta
             ]
         }
     }
@@ -74,10 +66,9 @@ def salvar_no_turso(dados):
         response = client.post(url, headers=headers, json=payload)
         
     if response.status_code == 200:
-        st.success("Dados enviados com sucesso!")
+        st.success("Ficha atualizada com sucesso!")
     else:
-        st.error(f"Erro ao salvar: {response.text}")
-
+        st.error(f"Erro ao atualizar: {response.text}")
 def carregar_fichas():
     base_url = st.secrets['TURSO_URL'].replace("libsql://", "https://")
     url = f"{base_url}/v1/execute"
