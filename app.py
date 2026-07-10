@@ -170,9 +170,12 @@ def atualizar_ficha_no_turso(dados):
     else:
         st.error(f"Erro ao atualizar: {response.text}")
 
-# --- PAINEL LATERAL (SELEÇÃO) ---
-# Criar o cursor primeiro
-cursor = db.cursor()
+
+# O método execute do libsql-client retorna o objeto de resposta diretamente
+resultado = db.execute("SELECT id, titulo, autor FROM fichas")
+
+# As linhas retornadas estão dentro de 'rows'
+fichas = resultado.rows
 cursor.execute("SELECT id, titulo, autor FROM fichas")
 fichas = cursor.fetchall()
 
@@ -182,7 +185,9 @@ id_selecionado = mapeamento[selecao_nome]
 
 # Carrega a ficha no estado
 if 'id_atual' not in st.session_state or st.session_state.id_atual != id_selecionado:
-    dados_banco = db.execute("SELECT * FROM fichas WHERE id = ?", (id_selecionado,)).fetchone()
+resultado_detalhe = db.execute("SELECT * FROM fichas WHERE id = ?", (id_selecionado,))
+# O primeiro item da lista de linhas é a sua ficha
+dados_banco = resultado_detalhe.rows[0]
     st.session_state.ficha = dict(dados_banco)
     st.session_state.id_atual = id_selecionado
     st.session_state.modo_edicao = False
