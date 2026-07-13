@@ -174,29 +174,31 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
+    # O container tem 'position: relative' para servir de âncora
+    # O CDU/Cutter tem 'position: absolute' e 'right: 20px' para ficar colado na direita
     html_content = f"""
-    <div style="position: relative; width: 100%; border: 2px solid #000; padding: 20px; font-family: 'Times New Roman', serif; color: black; background-color: white; box-sizing: border-box;">
+    <div style="position: relative; width: 100%; border: 2px solid #000; padding: 20px; font-family: 'Times New Roman', serif; color: black; background-color: white; box-sizing: border-box; min-height: 200px;">
         
-        <div style="position: absolute; top: 20px; right: 20px; text-align: right; width: 100px;">
-            <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
-            <div>{ficha.get('cutter') or '___'}</div>
+        <div style="position: absolute; top: 20px; right: 20px; text-align: right; width: 120px;">
+            <div style="font-weight: bold; font-size: 16px;">{ficha.get('cdd') or '___'}</div>
+            <div style="font-size: 16px;">{ficha.get('cutter') or '___'}</div>
         </div>
 
-        <div style="text-align: justify; padding-right: 120px;">
+        <div style="text-align: justify; padding-right: 140px;">
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Inclui bibliografia.</p>
-            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
         </div>
         
     </div>
     """
     
     import streamlit.components.v1 as components
-    components.html(html_content, height=300)
+    components.html(html_content, height=350)
     
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
