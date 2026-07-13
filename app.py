@@ -172,9 +172,9 @@ def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
     html_content = f"""
-    <div style="position: relative; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; padding: 10px; border: none; min-height: 200px;">
+    <div style="position: relative; width: 100%; border: 2px solid #000; padding: 20px; font-family: 'Times New Roman', serif; color: black; background-color: white; box-sizing: border-box;">
         
-        <div style="position: absolute; top: 0px; right: 0px; text-align: right; width: 100px;">
+        <div style="position: absolute; top: 20px; right: 20px; text-align: right; width: 100px;">
             <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
             <div>{ficha.get('cutter') or '___'}</div>
         </div>
@@ -186,7 +186,7 @@ def exibir_preview_ficha(ficha):
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Inclui bibliografia.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
+            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
         </div>
         
     </div>
