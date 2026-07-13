@@ -174,32 +174,33 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
-    # Formatação dos assuntos: 1. Termo 2. Termo
-    keywords = ficha.get('keywords', '').split(',')
-    assuntos_str = " ".join([f"{i+1}. {k.strip()}" for i, k in enumerate(keywords)])
+    # Formatação dos assuntos: "1. Assunto geral 2. Assunto específico." na mesma linha
+    keywords = ficha.get('keywords', '')
+    assuntos_formatados = ""
+    if keywords:
+        partes = [k.strip() for k in keywords.split(',') if k.strip()]
+        assuntos_formatados = " ".join([f"{i+1}. {parte}" for i, parte in enumerate(partes)])
     
     html_content = f"""
-    <div style="border: 2px solid #000; padding: 20px; font-family: 'Courier New', monospace; font-size: 14px; color: black; background-color: white; width: 100%; box-sizing: border-box;">
+    <div style="border: 2px solid #000; padding: 30px; font-family: 'Courier New', Courier, monospace; font-size: 14px; background-color: white; color: black; max-width: 700px; line-height: 1.5; box-sizing: border-box;">
         
-        <div style="display: flex; align-items: flex-start; margin-bottom: 10px;">
-            <div style="width: 100px; font-weight: bold;">
-                {ficha.get('cdd', '000.00')}<br>{ficha.get('cutter', 'Cutter')}
-            </div>
-            <div style="font-weight: bold; padding-top: 5px;">
-                {ficha.get('autor', 'SOBRENOME, Nome')}.
-            </div>
+        <div style="margin-bottom: 5px;">
+            {ficha.get('cutter', 'S677t')} {ficha.get('autor', 'Sobrenome, Nome, 1950 -')}
         </div>
 
-        <div style="text-align: center; margin-top: 10px;">
-            {ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. – 2026.<br>
-            {ficha.get('num_folhas', '0')} p.<br><br>
-            ISBN {ficha.get('isbn', '000-0000000000')}<br><br>
-            {assuntos_str} I. {ficha.get('titulo_titulo', 'Título')}.
+        <div style="padding-left: 60px;">
+            <p style="margin: 0;">{ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. - {ficha.get('instituicao', 'CDTN')}, 2026.</p>
+            <p style="margin: 0;">{ficha.get('num_folhas', '200')} p.</p>
+            
+            <p style="margin: 15px 0;">ISBN {ficha.get('isbn', '12-34567-89-0')}</p>
+            
+            <p style="margin: 15px 0 0 0;">{assuntos_formatados}</p>
+            <p style="margin: 0;">I. {ficha.get('titulo_titulo', 'Título')}</p>
         </div>
 
-        <div style="text-align: right; margin-top: 20px;">
-            CDD: {ficha.get('cdd', '000.00')}<br>
-            CDU: {ficha.get('cdu', '000.000.00')}
+        <div style="text-align: right; margin-top: 30px;">
+            CDD: {ficha.get('cdd', '1234.56')}<br>
+            CDU: {ficha.get('cdu', '123.456.7(89)-0')}
         </div>
         
     </div>
