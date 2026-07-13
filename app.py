@@ -169,9 +169,13 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 # --- 3. PREVIEW ---
 def exibir_preview_ficha(ficha):
+    """
+    Exibe o layout da Ficha Catalográfica com CDU/Cutter 
+    alinhados à esquerda, sem bordas ou caixas.
+    """
     st.write("### Preview da Ficha Catalográfica")
     
-    # Criamos um estilo único para este componente para evitar conflitos
+    # CSS injetado para garantir o layout limpo
     preview_html = f"""
     <style>
         .ficha-container {{
@@ -184,26 +188,38 @@ def exibir_preview_ficha(ficha):
             color: black !important;
             font-family: 'Times New Roman', serif !important;
         }}
-        .coluna-texto {{ flex: 1 !important; text-align: justify !important; padding-right: 15px !important; }}
-        .coluna-cdd {{ width: 100px !important; text-align: center !important; border: 1px solid #000 !important; height: fit-content !important; padding: 5px !important; }}
+        .coluna-texto {{ 
+            flex: 1 !important; 
+            text-align: justify !important; 
+            padding-right: 15px !important; 
+        }}
+        .coluna-cdd {{ 
+            width: 100px !important; 
+            text-align: left !important; 
+            border: none !important; 
+            height: fit-content !important; 
+            padding: 5px !important; 
+        }}
     </style>
     
     <div class="ficha-container">
         <div class="coluna-texto">
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – {ficha.get('ano_defesa', '2026')}.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Inclui bibliografia.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
         </div>
+        
         <div class="coluna-cdd">
-            <div style="font-weight: bold; border-bottom: 1px solid #000;">{ficha.get('cdd') or '___'}</div>
+            <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
             <div>{ficha.get('cutter') or '___'}</div>
         </div>
     </div>
     """
+    
     st.markdown(preview_html, unsafe_allow_html=True)
     
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
