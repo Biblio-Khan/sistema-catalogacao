@@ -185,10 +185,11 @@ def exibir_preview_ficha(ficha):
     <div style="border: 2px solid #000; padding: 30px; font-family: 'Courier New', Courier, monospace; font-size: 14px; background-color: white; color: black; max-width: 700px; line-height: 1.5; box-sizing: border-box;">
         
         <div style="margin-bottom: 5px;">
+            {ficha.get('cdd', '1234.56')}<br>
             {ficha.get('cutter', 'S677t')} {ficha.get('autor', 'Sobrenome, Nome, 1950 -')}
         </div>
 
-        <div style="padding-left: 60px;">
+        <div style="padding-left: 60px; text-align: justify;">
             <p style="margin: 0;">{ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. - {ficha.get('instituicao', 'CDTN')}, 2026.</p>
             <p style="margin: 0;">{ficha.get('num_folhas', '200')} p.</p>
             
@@ -199,7 +200,6 @@ def exibir_preview_ficha(ficha):
         </div>
 
         <div style="text-align: right; margin-top: 30px;">
-            CDD: {ficha.get('cdd', '1234.56')}<br>
             CDU: {ficha.get('cdu', '123.456.7(89)-0')}
         </div>
         
