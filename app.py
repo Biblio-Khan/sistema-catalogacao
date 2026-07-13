@@ -221,8 +221,6 @@ def exibir_preview_ficha(ficha):
     
     st.markdown(preview_html, unsafe_allow_html=True)
     
-    st.markdown(preview_html, unsafe_allow_html=True)
-    
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
