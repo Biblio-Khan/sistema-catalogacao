@@ -175,16 +175,16 @@ def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
     # O container tem 'position: relative' para servir de âncora
-    # O CDU/Cutter tem 'position: absolute' e 'right: 20px' para ficar colado na direita
+    # O CDU/Cutter tem 'position: absolute' e 'left: 20px' para ficar colado na ESQUERDA
     html_content = f"""
     <div style="position: relative; width: 100%; border: 2px solid #000; padding: 20px; font-family: 'Times New Roman', serif; color: black; background-color: white; box-sizing: border-box; min-height: 200px;">
         
-        <div style="position: absolute; top: 20px; right: 20px; text-align: right; width: 120px;">
+        <div style="position: absolute; top: 20px; left: 20px; text-align: left; width: 100px;">
             <div style="font-weight: bold; font-size: 16px;">{ficha.get('cdd') or '___'}</div>
             <div style="font-size: 16px;">{ficha.get('cutter') or '___'}</div>
         </div>
 
-        <div style="text-align: justify; padding-right: 140px;">
+        <div style="text-align: justify; padding-left: 130px;">
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
@@ -199,7 +199,6 @@ def exibir_preview_ficha(ficha):
     
     import streamlit.components.v1 as components
     components.html(html_content, height=350)
-    
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
