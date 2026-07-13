@@ -175,32 +175,32 @@ def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
     html_content = f"""
-    <div style="border: 2px solid #000; padding: 20px; font-family: 'Times New Roman', serif; color: black; background-color: white; width: 100%; box-sizing: border-box;">
+    <div style="border: 2px solid #000; padding: 20px; font-family: 'Courier New', monospace; color: black; background-color: white; width: 100%; box-sizing: border-box; line-height: 1.4;">
         
-        <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
-            <div style="text-align: left; width: 100px; font-weight: bold;">
-                <div>{ficha.get('cdd') or '___'}</div>
-                <div>{ficha.get('cutter') or '___'}</div>
-            </div>
-            <div style="flex-grow: 1; padding-left: 10px; font-weight: bold; align-self: center;">
-                {ficha.get('autor', 'SOBRENOME, Nome')}.
-            </div>
+        <div style="display: flex; align-items: flex-start;">
+            <div style="width: 80px;">{ficha.get('cutter', 'Cutter')}</div>
+            <div>{ficha.get('autor', 'SOBRENOME, Nome')}.</div>
         </div>
 
-        <div style="text-align: justify;">
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Inclui bibliografia.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
+        <div style="padding-left: 80px;">
+            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
+            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} p.</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;ISBN {ficha.get('isbn', '000-0000000000')}</p>
+            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;')}.</p>
+            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;I. {ficha.get('titulo_titulo', 'Título')}.</p>
+        </div>
+
+        <div style="text-align: right; margin-top: 20px;">
+            <div>CDD: {ficha.get('cdd', '000.00')}</div>
+            <div>CDU: {ficha.get('cdu', '000.000.00')}</div>
         </div>
         
     </div>
     """
     
     import streamlit.components.v1 as components
-    components.html(html_content, height=350)
+    components.html(html_content, height=400)
+    
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
