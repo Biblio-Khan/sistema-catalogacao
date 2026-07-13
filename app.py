@@ -1,5 +1,8 @@
 import streamlit as st
+import pandas as pd
 import httpx
+import requests
+from fpdf import FPDF
 
 URL_LOGO = "https://github.com/Biblio-Khan/sistema-catalogacao/blob/main/Logotipo-CDTN.png?raw=true"
 
