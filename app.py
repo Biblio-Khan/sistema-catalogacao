@@ -177,15 +177,17 @@ def exibir_preview_ficha(ficha):
     html_content = f"""
     <div style="border: 2px solid #000; padding: 20px; font-family: 'Times New Roman', serif; color: black; background-color: white; width: 100%; box-sizing: border-box;">
         
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-            <div style="font-weight: bold;">{ficha.get('autor', 'SOBRENOME, Nome')}.</div>
-            <div style="text-align: right;">
-                <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
+        <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
+            <div style="text-align: left; width: 100px; font-weight: bold;">
+                <div>{ficha.get('cdd') or '___'}</div>
                 <div>{ficha.get('cutter') or '___'}</div>
+            </div>
+            <div style="flex-grow: 1; padding-left: 10px; font-weight: bold; align-self: center;">
+                {ficha.get('autor', 'SOBRENOME, Nome')}.
             </div>
         </div>
 
-        <div style="text-align: justify; margin-top: 10px;">
+        <div style="text-align: justify;">
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('tipo_trabalho', '')} – {ficha.get('instituicao', 'CDTN')}.</p>
