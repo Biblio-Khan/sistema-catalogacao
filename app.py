@@ -170,19 +170,18 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 # --- 3. PREVIEW ---
 def exibir_preview_ficha(ficha):
     """
-    Exibe o layout da Ficha Catalográfica com CDU/Cutter 
-    alinhados à esquerda, sem bordas ou caixas.
+    Exibe o layout da Ficha Catalográfica de forma limpa, 
+    sem bordas na ficha e sem caixas no CDU/Cutter.
     """
     st.write("### Preview da Ficha Catalográfica")
     
-    # CSS injetado para garantir o layout limpo
     preview_html = f"""
     <style>
         .ficha-container {{
             display: flex !important;
             flex-direction: row !important;
-            border: 2px solid #000 !important;
-            padding: 20px !important;
+            border: none !important; /* REMOVIDA A BORDA DA FICHA */
+            padding: 0px !important;  /* REMOVIDO O ESPAÇAMENTO INTERNO */
             width: 100% !important;
             background-color: white !important;
             color: black !important;
@@ -219,6 +218,8 @@ def exibir_preview_ficha(ficha):
         </div>
     </div>
     """
+    
+    st.markdown(preview_html, unsafe_allow_html=True)
     
     st.markdown(preview_html, unsafe_allow_html=True)
     
