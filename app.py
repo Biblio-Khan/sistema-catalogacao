@@ -169,9 +169,12 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 # --- 3. PREVIEW ---
 def exibir_preview_ficha(ficha):
+    """
+    Exibe a ficha com os dados bibliográficos à esquerda 
+    e o CDD/Cutter no topo à direita.
+    """
     st.write("### Preview da Ficha Catalográfica")
     
-    # Criamos o HTML limpo
     html_content = f"""
     <div style="display: flex; flex-direction: row; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; border: none; padding: 0;">
         
@@ -185,13 +188,17 @@ def exibir_preview_ficha(ficha):
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
         </div>
         
-        <div style="width: 100px; text-align: left;">
+        <div style="width: 100px; text-align: right; margin-top: 0;">
             <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
             <div>{ficha.get('cutter') or '___'}</div>
         </div>
         
     </div>
     """
+    
+    import streamlit.components.v1 as components
+    # A altura ajusta o bloco de preview na tela
+    components.html(html_content, height=250)
     
     # IMPORTANTE: Usamos st.components.v1.html para garantir renderização total
     import streamlit.components.v1 as components
