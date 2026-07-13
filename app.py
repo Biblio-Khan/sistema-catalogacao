@@ -200,10 +200,6 @@ def exibir_preview_ficha(ficha):
     # A altura ajusta o bloco de preview na tela
     components.html(html_content, height=250)
     
-    # IMPORTANTE: Usamos st.components.v1.html para garantir renderização total
-    import streamlit.components.v1 as components
-    components.html(html_content, height=300)
-    
     st.markdown(preview_html, unsafe_allow_html=True)
     
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
