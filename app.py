@@ -171,9 +171,9 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
-    # Aplicando o estilo diretamente nos elementos para evitar cache de classes
-    preview_html = f"""
-    <div style="display: flex; flex-direction: row; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white;">
+    # Criamos o HTML limpo
+    html_content = f"""
+    <div style="display: flex; flex-direction: row; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; border: none; padding: 0;">
         
         <div style="flex: 1; text-align: justify; padding-right: 20px;">
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
@@ -192,6 +192,10 @@ def exibir_preview_ficha(ficha):
         
     </div>
     """
+    
+    # IMPORTANTE: Usamos st.components.v1.html para garantir renderização total
+    import streamlit.components.v1 as components
+    components.html(html_content, height=300)
     
     st.markdown(preview_html, unsafe_allow_html=True)
     
