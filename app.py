@@ -174,12 +174,12 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
-    # Formatação dos assuntos: "1. Assunto geral 2. Assunto específico." na mesma linha
-    keywords = ficha.get('keywords', '')
-    assuntos_formatados = ""
-    if keywords:
-        partes = [k.strip() for k in keywords.split(',') if k.strip()]
-        assuntos_formatados = " ".join([f"{i+1}. {parte}" for i, parte in enumerate(partes)])
+    # 1. Limpeza de quebras de linha invisíveis que podem vir do formulário
+    keywords_raw = ficha.get('keywords', '').replace('\n', ',').replace('\r', ',').replace('<br>', ',')
+    
+    # 2. Formatação dos assuntos: "1. Assunto geral 2. Assunto específico."
+    partes = [k.strip() for k in keywords_raw.split(',') if k.strip()]
+    assuntos_formatados = " ".join([f"{i+1}. {parte}" for i, parte in enumerate(partes)])
     
     html_content = f"""
     <div style="border: 2px solid #000; padding: 30px; font-family: 'Courier New', Courier, monospace; font-size: 14px; background-color: white; color: black; max-width: 700px; line-height: 1.5; box-sizing: border-box;">
@@ -195,8 +195,7 @@ def exibir_preview_ficha(ficha):
             
             <p style="margin: 15px 0;">ISBN {ficha.get('isbn', '12-34567-89-0')}</p>
             
-            <p style="margin: 15px 0 0 0;">{assuntos_formatados}</p>
-            <p style="margin: 0;">I. {ficha.get('titulo_titulo', 'Título')}</p>
+            <p style="margin: 15px 0 0 0;">{assuntos_formatados} I. {ficha.get('titulo_titulo', 'Título')}.</p>
         </div>
 
         <div style="text-align: right; margin-top: 30px;">
