@@ -169,40 +169,13 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 # --- 3. PREVIEW ---
 def exibir_preview_ficha(ficha):
-    """
-    Exibe o layout da Ficha Catalográfica de forma limpa, 
-    sem bordas na ficha e sem caixas no CDU/Cutter.
-    """
     st.write("### Preview da Ficha Catalográfica")
     
+    # Aplicando o estilo diretamente nos elementos para evitar cache de classes
     preview_html = f"""
-    <style>
-        .ficha-container {{
-            display: flex !important;
-            flex-direction: row !important;
-            border: none !important; /* REMOVIDA A BORDA DA FICHA */
-            padding: 0px !important;  /* REMOVIDO O ESPAÇAMENTO INTERNO */
-            width: 100% !important;
-            background-color: white !important;
-            color: black !important;
-            font-family: 'Times New Roman', serif !important;
-        }}
-        .coluna-texto {{ 
-            flex: 1 !important; 
-            text-align: justify !important; 
-            padding-right: 15px !important; 
-        }}
-        .coluna-cdd {{ 
-            width: 100px !important; 
-            text-align: left !important; 
-            border: none !important; 
-            height: fit-content !important; 
-            padding: 5px !important; 
-        }}
-    </style>
-    
-    <div class="ficha-container">
-        <div class="coluna-texto">
+    <div style="display: flex; flex-direction: row; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white;">
+        
+        <div style="flex: 1; text-align: justify; padding-right: 20px;">
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} f.</p>
@@ -212,10 +185,11 @@ def exibir_preview_ficha(ficha):
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;1. {ficha.get('keywords', '').replace(', ', '<br>&nbsp;&nbsp;&nbsp;&nbsp;1. ')}.</p>
         </div>
         
-        <div class="coluna-cdd">
+        <div style="width: 100px; text-align: left;">
             <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
             <div>{ficha.get('cutter') or '___'}</div>
         </div>
+        
     </div>
     """
     
