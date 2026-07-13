@@ -172,9 +172,9 @@ def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
     html_content = f"""
-    <div style="position: relative; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; padding: 10px; border: none;">
+    <div style="position: relative; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; padding: 10px; border: none; min-height: 200px;">
         
-        <div style="position: absolute; top: 0; right: 0; text-align: right; width: 100px;">
+        <div style="position: absolute; top: 0px; right: 0px; text-align: right; width: 100px;">
             <div style="font-weight: bold;">{ficha.get('cdd') or '___'}</div>
             <div>{ficha.get('cutter') or '___'}</div>
         </div>
@@ -193,7 +193,7 @@ def exibir_preview_ficha(ficha):
     """
     
     import streamlit.components.v1 as components
-    components.html(html_content, height=250)
+    components.html(html_content, height=300)
     
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
