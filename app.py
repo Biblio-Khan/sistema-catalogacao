@@ -169,14 +169,18 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 
 # --- 3. PREVIEW ---
 def exibir_preview_ficha(ficha):
-    """Exibe o layout da Ficha Catalográfica com campos completos e normas AACR2/ABNT"""
+    """Exibe o layout da Ficha Catalográfica com CDU/Cutter no canto superior direito"""
     st.write("### Preview da Ficha Catalográfica")
     
     preview_html = f"""
     <div style="border: 2px solid #000; padding: 20px; width: 100%; font-family: 'Times New Roman', serif; color: black; background-color: white; line-height: 1.3;">
-        <div style="text-align: center;">
-            <p style="margin: 0;">{ficha.get('cdd') or '___'} - {ficha.get('cutter') or '___'}</p>
+        
+        <!-- Bloco do CDU e Cutter (Alinhado à direita) -->
+        <div style="float: right; text-align: center; border: 1px solid #000; padding: 5px; min-width: 100px;">
+            <p style="margin: 0; font-weight: bold;">{ficha.get('cdd') or '___'}</p>
+            <p style="margin: 0;">{ficha.get('cutter') or '___'}</p>
         </div>
+
         <div style="margin-left: 60px; text-align: justify; text-indent: -20px;">
             <p style="margin: 0;">{ficha.get('autor', 'SOBRENOME, Nome')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – {ficha.get('ano_defesa', '2026')}.</p>
@@ -185,13 +189,14 @@ def exibir_preview_ficha(ficha):
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Orientador(es): {ficha.get('orientadores', '')}.</p>
             <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;Inclui bibliografia.</p>
         </div>
+        
         <div style="margin-left: 40px; margin-top: 10px;">
             <p style="margin: 0;">1. {ficha.get('keywords', '').replace(', ', '<br>1. ')}.</p>
         </div>
+        <div style="clear: both;"></div>
     </div>
     """
     st.markdown(preview_html, unsafe_allow_html=True)
-
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
