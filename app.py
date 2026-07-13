@@ -181,36 +181,32 @@ def exibir_preview_ficha(ficha):
     html_content = f"""
     <div style="border: 2px solid #000; padding: 20px; font-family: 'Courier New', monospace; font-size: 14px; color: black; background-color: white; width: 100%; box-sizing: border-box;">
         
-        <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace;">
-            <tr>
-                <td style="width: 100px; vertical-align: top; font-weight: bold;">
-                    {ficha.get('cdd', '000.00')}<br>{ficha.get('cutter', 'Cutter')}
-                </td>
-                <td style="vertical-align: top; font-weight: bold;">
-                    {ficha.get('autor', 'SOBRENOME, Nome')}.
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" style="text-align: center; padding-top: 15px;">
-                    {ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. – 2026.<br>
-                    {ficha.get('num_folhas', '0')} p.<br><br>
-                    ISBN {ficha.get('isbn', '000-0000000000')}<br><br>
-                    {assuntos_str} I. {ficha.get('titulo_titulo', 'Título')}.
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" style="text-align: right; padding-top: 20px;">
-                    CDU: {ficha.get('cdu', '000.000.00')}
-                </td>
-            </tr>
-        </table>
+        <div style="display: flex; align-items: flex-start; margin-bottom: 10px;">
+            <div style="width: 100px; font-weight: bold;">
+                {ficha.get('cdd', '000.00')}<br>{ficha.get('cutter', 'Cutter')}
+            </div>
+            <div style="font-weight: bold; padding-top: 5px;">
+                {ficha.get('autor', 'SOBRENOME, Nome')}.
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 10px;">
+            {ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. – 2026.<br>
+            {ficha.get('num_folhas', '0')} p.<br><br>
+            ISBN {ficha.get('isbn', '000-0000000000')}<br><br>
+            {assuntos_str} I. {ficha.get('titulo_titulo', 'Título')}.
+        </div>
+
+        <div style="text-align: right; margin-top: 20px;">
+            CDD: {ficha.get('cdd', '000.00')}<br>
+            CDU: {ficha.get('cdu', '000.000.00')}
+        </div>
         
     </div>
     """
     
     import streamlit.components.v1 as components
     components.html(html_content, height=450)
-    
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
