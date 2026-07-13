@@ -174,47 +174,38 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
-    # Formatação dos assuntos e títulos para ficarem na mesma linha
-    keywords = ficha.get('keywords', '')
-    # Monta a string: "1. Termo A 2. Termo B I. Titulo"
-    assuntos_formatados = ""
-    if keywords:
-        partes = [k.strip() for k in keywords.split(',')]
-        for i, parte in enumerate(partes, 1):
-            assuntos_formatados += f"{i}. {parte} "
-    
-    titulo_secundario = f"I. {ficha.get('titulo_titulo', 'Título')}"
+    # Formatação dos assuntos: 1. Termo 2. Termo
+    keywords = ficha.get('keywords', '').split(',')
+    assuntos_str = " ".join([f"{i+1}. {k.strip()}" for i, k in enumerate(keywords)])
     
     html_content = f"""
-    <div style="border: 2px solid #000; padding: 20px; font-family: 'Courier New', monospace; color: black; background-color: white; width: 100%; box-sizing: border-box; line-height: 1.4;">
+    <div style="border: 2px solid #000; padding: 20px; font-family: 'Courier New', monospace; font-size: 14px; color: black; background-color: white; width: 100%; box-sizing: border-box;">
         
-        <div style="display: flex; align-items: flex-start;">
-            <div style="width: 120px; font-weight: bold;">
-                <div>{ficha.get('cdd', '000.00')}</div>
-                <div>{ficha.get('cutter', 'Cutter')}</div>
+        <div style="display: flex; align-items: flex-start; margin-bottom: 10px;">
+            <div style="width: 100px; font-weight: bold; text-align: left;">
+                {ficha.get('cdd', '000.00')}<br>{ficha.get('cutter', 'Cutter')}
             </div>
-            <div style="flex-grow: 1;">
+            <div style="flex-grow: 1; font-weight: bold; text-align: left;">
                 {ficha.get('autor', 'SOBRENOME, Nome')}.
             </div>
         </div>
 
-        <div style="padding-left: 120px;">
-            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('titulo', 'Título')}&nbsp;{ficha.get('subtitulo', '')} / {ficha.get('autor', '').split(',')[0]}. – 2026.</p>
-            <p style="margin: 0;">&nbsp;&nbsp;&nbsp;&nbsp;{ficha.get('num_folhas', '0')} p.</p>
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;ISBN {ficha.get('isbn', '000-0000000000')}</p>
-            
-            <p style="margin: 5px 0;">&nbsp;&nbsp;&nbsp;&nbsp;{assuntos_formatados} {titulo_secundario}.</p>
+        <div style="text-align: center;">
+            {ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. – 2026.<br>
+            {ficha.get('num_folhas', '0')} p.<br><br>
+            ISBN {ficha.get('isbn', '000-0000000000')}<br><br>
+            {assuntos_str} I. {ficha.get('titulo_titulo', 'Título')}.
         </div>
 
         <div style="text-align: right; margin-top: 20px;">
-            <div>CDU: {ficha.get('cdu', '000.000.00')}</div>
+            CDU: {ficha.get('cdu', '000.000.00')}
         </div>
         
     </div>
     """
     
     import streamlit.components.v1 as components
-    components.html(html_content, height=400)
+    components.html(html_content, height=450)
     
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
