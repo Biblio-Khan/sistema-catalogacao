@@ -220,7 +220,7 @@ def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
     with st.expander("Adicionar CDU e Cutter", expanded=True):
         with st.form(f"form_cdd_cutter_{ficha.get('id')}"):
-            cdd = st.text_input("CDD", value=ficha.get('cdd') or "")
+            cdd = st.text_input("CDU", value=ficha.get('cdd') or "")
             cutter = st.text_input("Cutter", value=ficha.get('cutter') or "")
             if st.form_submit_button("Salvar Catalogação"):
                 # Atualiza os dois campos de uma vez
