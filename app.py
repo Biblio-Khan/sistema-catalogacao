@@ -174,36 +174,46 @@ def atualizar_ficha(id_ficha, cdd, cutter):
 def exibir_preview_ficha(ficha):
     st.write("### Preview da Ficha Catalográfica")
     
-    # 1. Limpeza de quebras de linha invisíveis que podem vir do formulário
+    # 1. Limpeza de quebras de linha invisíveis
     keywords_raw = ficha.get('keywords', '').replace('\n', ',').replace('\r', ',').replace('<br>', ',')
     
-    # 2. Formatação dos assuntos: "1. Assunto geral 2. Assunto específico."
+    # 2. Formatação dos assuntos
     partes = [k.strip() for k in keywords_raw.split(',') if k.strip()]
     assuntos_formatados = " ".join([f"{i+1}. {parte}" for i, parte in enumerate(partes)])
     
     html_content = f"""
-    <div style="border: 2px solid #000; padding: 30px; font-family: 'Courier New', Courier, monospace; font-size: 14px; background-color: white; color: black; max-width: 700px; line-height: 1.5; box-sizing: border-box;">
-        
-        <div style="margin-bottom: 5px;">
-            {ficha.get('cdd', '1234.56')}<br>
-            {ficha.get('cutter', 'S677t')} {ficha.get('autor', 'Sobrenome, Nome, 1950 -')}
-        </div>
-
-        <div style="padding-left: 60px; text-align: justify;">
-            <p style="margin: 0;">{ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. - {ficha.get('instituicao', 'CDTN')}, 2026.</p>
-            <p style="margin: 0;">{ficha.get('num_folhas', '200')} p.</p>
+    <div style="display: flex; justify-content: center;">
+        <!-- Container principal com as medidas EXATAS: 12.5cm x 7.5cm -->
+        <div style="width: 12.5cm; height: 7.5cm; border: 1px solid #000; padding: 15px; font-family: 'Courier New', Courier, monospace; font-size: 11px; background-color: white; color: black; box-sizing: border-box; line-height: 1.2; position: relative; overflow: hidden;">
             
-            <p style="margin: 15px 0;">ISBN {ficha.get('isbn', '12-34567-89-0')}</p>
-            
-            <p style="margin: 15px 0 0 0;">{assuntos_formatados} I. {ficha.get('titulo_titulo', 'Título')}.</p>
-        </div>
+            <!-- LINHA 1: CDD em cima, Cutter e Autor na linha de baixo -->
+            <div style="margin-bottom: 5px;">
+                {ficha.get('cdd', '1234.56')}<br>
+                {ficha.get('cutter', 'S677t')} {ficha.get('autor', 'Sobrenome, Nome, 1950 -')}
+            </div>
 
-        <div style="text-align: right; margin-top: 30px;">
-            CDU: {ficha.get('cdu', '123.456.7(89)-0')}
+            <!-- CORPO DA FICHA: Recuado para a direita e justificado -->
+            <div style="padding-left: 45px; text-align: justify;">
+                <p style="margin: 0;">{ficha.get('titulo', 'Título')} / {ficha.get('autor', '').split(',')[0]}. - {ficha.get('instituicao', 'CDTN')}, 2026.</p>
+                <p style="margin: 0;">{ficha.get('num_folhas', '200')} p.</p>
+                
+                <p style="margin: 8px 0;">ISBN {ficha.get('isbn', '12-34567-89-0')}</p>
+                
+                <!-- ASSUNTOS E TÍTULO SECUNDÁRIO NA MESMA LINHA -->
+                <p style="margin: 8px 0 0 0;">{assuntos_formatados} I. {ficha.get('titulo_titulo', 'Título')}.</p>
+            </div>
+
+            <!-- RODAPÉ: CDU fixado na parte inferior direita -->
+            <div style="position: absolute; bottom: 15px; right: 15px; text-align: right;">
+                CDU: {ficha.get('cdu', '123.456.7(89)-0')}
+            </div>
+            
         </div>
-        
     </div>
     """
+    
+    import streamlit.components.v1 as components
+    components.html(html_content, height=350)
     
     import streamlit.components.v1 as components
     components.html(html_content, height=450)
