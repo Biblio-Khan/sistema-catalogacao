@@ -215,8 +215,6 @@ def exibir_preview_ficha(ficha):
     import streamlit.components.v1 as components
     components.html(html_content, height=350)
     
-    import streamlit.components.v1 as components
-    components.html(html_content, height=450)
 # --- 3. PAINEL DE EDIÇÃO (Lógica de atualizar um campo específico) ---
 def painel_edicao(ficha):
     # 1. Seção de Catalogação (CDD/Cutter) - Sempre visível e fácil
